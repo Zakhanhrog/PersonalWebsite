@@ -87,8 +87,7 @@
                     <div class="card-icon"><i class="fas fa-newspaper"></i></div>
                     <h5 class="card-title">Quản lý Bài Viết</h5>
                     <p class="card-text">Thêm, sửa, xóa các bài viết blog.</p>
-                    <a href="${pageContext.request.contextPath}/admin/blog" class="btn btn-primary">Truy cập</a>
-                </div>
+                    <a href="${pageContext.request.contextPath}/admin/blog" class="btn btn-primary">Truy cập</a>                </div>
             </div>
         </div>
         <div class="col-md-4">
@@ -111,27 +110,6 @@
                 </div>
             </div>
         </div>
-        <%-- Additional admin sections can be added here --%>
-        <%-- <div class="col-md-4">
-            <div class="card text-center h-100">
-                <div class="card-body">
-                    <div class="card-icon"><i class="fas fa-users-cog"></i></div>
-                    <h5 class="card-title">Quản lý Người dùng</h5>
-                    <p class="card-text">Quản lý tài khoản quản trị viên.</p>
-                    <a href="${pageContext.request.contextPath}/admin/users" class="btn btn-primary">Truy cập</a>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card text-center h-100">
-                <div class="card-body">
-                    <div class="card-icon"><i class="fas fa-cog"></i></div>
-                    <h5 class="card-title">Cài Đặt Website</h5>
-                    <p class="card-text">Cấu hình chung cho website.</p>
-                    <a href="#" class="btn btn-secondary disabled">Truy cập (Chưa có)</a>
-                </div>
-            </div>
-        </div> --%>
     </div>
 </div>
 
