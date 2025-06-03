@@ -5,6 +5,7 @@
 
 <jsp:include page="/WEB-INF/includes/header.jsp" />
 
+
 <!-- Hero Section -->
 <section class="hero-area" id="home">
     <div class="container">

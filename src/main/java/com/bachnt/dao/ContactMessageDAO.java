@@ -114,4 +114,19 @@ public class ContactMessageDAO {
         message.setStatus(rs.getString("status"));
         return message;
     }
+
+    public int getUnreadMessageCount() {
+        int count = 0;
+        String sql = "SELECT COUNT(*) FROM contact_messages WHERE status = 'new'";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                count = rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return count;
+    }
 }

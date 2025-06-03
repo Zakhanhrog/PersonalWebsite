@@ -1972,3 +1972,11 @@ p {
         justify-content: center;
     }
 }
+
+.btn .badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    padding: 0.3em 0.5em; /* Điều chỉnh padding */
+    font-size: 0.7em; /* Điều chỉnh font size */
+}
