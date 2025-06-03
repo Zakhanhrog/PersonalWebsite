@@ -13,7 +13,7 @@ public class BlogPost {
     private String imageUrl;
     private String category;
     private String tags;
-    private String status; // e.g., "published", "draft", "archived"
+    private String status;
 
     public BlogPost() {
     }

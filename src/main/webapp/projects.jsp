@@ -89,27 +89,6 @@
                 </c:otherwise>
             </c:choose>
         </div>
-
-        <%-- Pagination Placeholder --%>
-        <%--
-        <c:if test="${totalPages > 1}">
-            <nav aria-label="Page navigation" class="mt-5" data-aos="fade-up">
-                <ul class="pagination justify-content-center">
-                    <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
-                        <a class="page-link" href="${pageContext.request.contextPath}/projects?page=${currentPage - 1}<c:if test="${not empty currentCategoryFilter}">&category=${currentCategoryFilter}</c:if>">Trước</a>
-                    </li>
-                    <c:forEach begin="1" end="${totalPages}" var="i">
-                        <li class="page-item ${currentPage == i ? 'active' : ''}">
-                            <a class="page-link" href="${pageContext.request.contextPath}/projects?page=${i}<c:if test="${not empty currentCategoryFilter}">&category=${currentCategoryFilter}</c:if>">${i}</a>
-                        </li>
-                    </c:forEach>
-                    <li class="page-item ${currentPage == totalPages ? 'disabled' : ''}">
-                        <a class="page-link" href="${pageContext.request.contextPath}/projects?page=${currentPage + 1}<c:if test="${not empty currentCategoryFilter}">&category=${currentCategoryFilter}</c:if>">Sau</a>
-                    </li>
-                </ul>
-            </nav>
-        </c:if>
-        --%>
     </div>
 </section>
 

@@ -3,6 +3,10 @@ package com.bachnt.web.servlet.admin;
 import com.bachnt.dao.ProfileDAO;
 import com.bachnt.model.Profile;
 import com.bachnt.model.Skill;
+import com.bachnt.dao.EducationDAO;
+import com.bachnt.dao.ExperienceDAO;
+import com.bachnt.model.Education;
+import com.bachnt.model.Experience;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -12,27 +16,36 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
+import java.text.SimpleDateFormat;
+import java.text.ParseException;
 
 @WebServlet("/admin/profile")
 public class AdminProfileServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private ProfileDAO profileDAO;
+    private EducationDAO educationDAO;
+    private ExperienceDAO experienceDAO;
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     @Override
     public void init() throws ServletException {
         profileDAO = new ProfileDAO();
+        educationDAO = new EducationDAO();
+        experienceDAO = new ExperienceDAO();
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // Auth filter đã xử lý việc đăng nhập
-        // String action = request.getParameter("action"); // Có thể dùng action cho skill sau này
-
-        Profile profile = profileDAO.getProfileById(1); // Luôn lấy profile ID 1
+        request.setCharacterEncoding("UTF-8");
+        Profile profile = profileDAO.getProfileById(1);
         List<Skill> skills = profileDAO.getSkillsByProfileId(1);
+        List<Education> educations = educationDAO.getEducationsByProfileId(1);
+        List<Experience> experiences = experienceDAO.getExperiencesByProfileId(1);
 
         request.setAttribute("profile", profile);
         request.setAttribute("skillsList", skills);
+        request.setAttribute("educationsList", educations);
+        request.setAttribute("experiencesList", experiences);
 
         HttpSession session = request.getSession();
         if (session.getAttribute("profileUpdateMessage") != null) {
@@ -55,13 +68,11 @@ public class AdminProfileServlet extends HttpServlet {
 
         if ("updateProfile".equals(action)) {
             try {
-                Profile profile = profileDAO.getProfileById(1); // Lấy profile hiện tại để cập nhật
-                if (profile == null) { // Trường hợp hi hữu profile chưa có trong DB
+                Profile profile = profileDAO.getProfileById(1);
+                if (profile == null) {
                     profile = new Profile();
-                    profile.setId(1); // Mặc định ID là 1
-                    // Có thể cần logic để INSERT nếu chưa có, nhưng thường profile sẽ được tạo sẵn
+                    profile.setId(1);
                 }
-
                 profile.setName(request.getParameter("name"));
                 profile.setPosition(request.getParameter("position"));
                 profile.setCompanyName(request.getParameter("companyName"));
@@ -70,7 +81,7 @@ public class AdminProfileServlet extends HttpServlet {
                 profile.setPhoneNumber(request.getParameter("phoneNumber"));
                 profile.setEmail(request.getParameter("email"));
                 profile.setBio(request.getParameter("bio"));
-                profile.setPhotoUrl(request.getParameter("photoUrl")); // Cân nhắc việc upload file ảnh sau
+                profile.setPhotoUrl(request.getParameter("photoUrl"));
 
                 boolean success = profileDAO.updateProfile(profile);
                 if (success) {
@@ -80,12 +91,12 @@ public class AdminProfileServlet extends HttpServlet {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                session.setAttribute("profileUpdateError", "Lỗi hệ thống: " + e.getMessage());
+                session.setAttribute("profileUpdateError", "Lỗi hệ thống khi cập nhật hồ sơ: " + e.getMessage());
             }
         } else if ("addSkill".equals(action)) {
             try {
                 Skill skill = new Skill();
-                skill.setProfileId(1); // Luôn gắn với profile ID 1
+                skill.setProfileId(1);
                 skill.setName(request.getParameter("skillName"));
                 skill.setLevel(Integer.parseInt(request.getParameter("skillLevel")));
                 skill.setCategory(request.getParameter("skillCategory"));
@@ -118,6 +129,75 @@ public class AdminProfileServlet extends HttpServlet {
             catch (Exception e) {
                 e.printStackTrace();
                 session.setAttribute("profileUpdateError", "Lỗi hệ thống khi xóa kỹ năng: " + e.getMessage());
+            }
+        } else if ("addEducation".equals(action)) {
+            try {
+                Education edu = new Education();
+                edu.setProfileId(1);
+                edu.setSchoolName(request.getParameter("eduSchoolName"));
+                edu.setDegree(request.getParameter("eduDegree"));
+                edu.setFieldOfStudy(request.getParameter("eduFieldOfStudy"));
+                edu.setStartYear(request.getParameter("eduStartYear"));
+                edu.setEndYear(request.getParameter("eduEndYear"));
+                edu.setDescription(request.getParameter("eduDescription"));
+
+                boolean success = educationDAO.addEducation(edu);
+                if (success) session.setAttribute("profileUpdateMessage", "Học vấn đã được thêm!");
+                else session.setAttribute("profileUpdateError", "Lỗi: Không thể thêm học vấn.");
+            } catch (Exception e) {
+                e.printStackTrace();
+                session.setAttribute("profileUpdateError", "Lỗi hệ thống khi thêm học vấn: " + e.getMessage());
+            }
+        } else if ("deleteEducation".equals(action)) {
+            try {
+                int eduId = Integer.parseInt(request.getParameter("eduId"));
+                boolean success = educationDAO.deleteEducation(eduId);
+                if (success) session.setAttribute("profileUpdateMessage", "Học vấn đã được xóa!");
+                else session.setAttribute("profileUpdateError", "Lỗi: Không thể xóa học vấn.");
+            } catch (NumberFormatException e) {
+                session.setAttribute("profileUpdateError", "Lỗi: ID học vấn không hợp lệ.");
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+                session.setAttribute("profileUpdateError", "Lỗi hệ thống khi xóa học vấn: " + e.getMessage());
+            }
+        } else if ("addExperience".equals(action)) {
+            try {
+                Experience exp = new Experience();
+                exp.setProfileId(1);
+                exp.setCompanyName(request.getParameter("expCompanyName"));
+                exp.setPosition(request.getParameter("expPosition"));
+                exp.setDescriptionResponsibilities(request.getParameter("expDescription"));
+
+                String startDateStr = request.getParameter("expStartDate");
+                if (startDateStr != null && !startDateStr.isEmpty()) exp.setStartDate(dateFormat.parse(startDateStr));
+
+                String endDateStr = request.getParameter("expEndDate");
+                if (endDateStr != null && !endDateStr.isEmpty()) exp.setEndDate(dateFormat.parse(endDateStr));
+                else exp.setEndDate(null);
+
+                boolean success = experienceDAO.addExperience(exp);
+                if (success) session.setAttribute("profileUpdateMessage", "Kinh nghiệm đã được thêm!");
+                else session.setAttribute("profileUpdateError", "Lỗi: Không thể thêm kinh nghiệm.");
+            } catch (ParseException pe) {
+                session.setAttribute("profileUpdateError", "Lỗi định dạng ngày tháng (yyyy-MM-dd) cho kinh nghiệm.");
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+                session.setAttribute("profileUpdateError", "Lỗi hệ thống khi thêm kinh nghiệm: " + e.getMessage());
+            }
+        } else if ("deleteExperience".equals(action)) {
+            try {
+                int expId = Integer.parseInt(request.getParameter("expId"));
+                boolean success = experienceDAO.deleteExperience(expId);
+                if (success) session.setAttribute("profileUpdateMessage", "Kinh nghiệm đã được xóa!");
+                else session.setAttribute("profileUpdateError", "Lỗi: Không thể xóa kinh nghiệm.");
+            } catch (NumberFormatException e) {
+                session.setAttribute("profileUpdateError", "Lỗi: ID kinh nghiệm không hợp lệ.");
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+                session.setAttribute("profileUpdateError", "Lỗi hệ thống khi xóa kinh nghiệm: " + e.getMessage());
             }
         }
         response.sendRedirect(request.getContextPath() + "/admin/profile");

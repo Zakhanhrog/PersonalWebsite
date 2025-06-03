@@ -34,20 +34,6 @@
                              onerror="this.src='${pageContext.request.contextPath}/resources/images/default-project-large-placeholder.jpg'; this.onerror=null;">
                     </div>
 
-                        <%-- Project Gallery (Placeholder - Needs dynamic data structure and logic) --%>
-                        <%--
-                        <div class="project-gallery row mt-4" data-aos="fade-up" data-aos-delay="100">
-                            <div class="col-md-4 mb-3"><img src="https://via.placeholder.com/400x300?text=Gallery+1" alt="Gallery 1" class="img-fluid rounded"></div>
-                            <div class="col-md-4 mb-3"><img src="https://via.placeholder.com/400x300?text=Gallery+2" alt="Gallery 2" class="img-fluid rounded"></div>
-                            <div class="col-md-4 mb-3">
-                                <div class="gallery-item-more">
-                                    <img src="https://via.placeholder.com/400x300?text=Gallery+3" alt="Gallery 3" class="img-fluid rounded">
-                                    <div class="gallery-overlay">+5</div>
-                                </div>
-                            </div>
-                        </div>
-                        --%>
-
                     <!-- Project Content -->
                     <div class="project-main-content mt-5" data-aos="fade-up" data-aos-delay="200">
                         <h2 class="project-content-title"><c:out value="${project.title}"/></h2>
@@ -62,20 +48,6 @@
                         <div class="project-description-full mt-4" style="white-space: pre-line;">
                             <c:out value="${project.description}" escapeXml="false"/> <%-- Allow HTML if description is trusted --%>
                         </div>
-
-                            <%-- Project Timeline or Key Features (Placeholder - Needs dynamic data) --%>
-                            <%--
-                            <div class="project-key-features mt-4">
-                                <h4 class="sub-section-title">Điểm nổi bật của dự án</h4>
-                                <ul>
-                                    <li><i class="fas fa-check-circle text-success"></i> Thiết kế hiện đại, tối ưu không gian.</li>
-                                    <li><i class="fas fa-check-circle text-success"></i> Vị trí đắc địa, giao thông thuận tiện.</li>
-                                    <li><i class="fas fa-check-circle text-success"></i> Tiện ích nội khu đa dạng, đẳng cấp.</li>
-                                    <li><i class="fas fa-check-circle text-success"></i> Cộng đồng dân cư văn minh, thân thiện.</li>
-                                </ul>
-                            </div>
-                            --%>
-
                         <div class="project-share mt-5">
                             <h5 class="share-title">Chia sẻ dự án này:</h5>
                             <div class="social-share-icons">

@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,5 +39,73 @@ public class EducationDAO {
         }
         return educations;
     }
-    // Thêm các hàm add, update, delete Education nếu cần cho admin sau
+
+    public boolean addEducation(Education edu) {
+        String sql = "INSERT INTO educations (profile_id, school_name, degree, field_of_study, start_year, end_year, description) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        boolean rowInserted = false;
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, edu.getProfileId());
+            stmt.setString(2, edu.getSchoolName());
+            stmt.setString(3, edu.getDegree());
+            stmt.setString(4, edu.getFieldOfStudy());
+            stmt.setString(5, edu.getStartYear());
+            stmt.setString(6, edu.getEndYear());
+            stmt.setString(7, edu.getDescription());
+            rowInserted = stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return rowInserted;
+    }
+
+    public Education getEducationById(int educationId) {
+        Education edu = null;
+        String sql = "SELECT * FROM educations WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, educationId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    edu = extractEducationFromResultSet(rs);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return edu;
+    }
+
+    public boolean updateEducation(Education edu) {
+        String sql = "UPDATE educations SET school_name = ?, degree = ?, field_of_study = ?, start_year = ?, end_year = ?, description = ? WHERE id = ? AND profile_id = ?";
+        boolean rowUpdated = false;
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, edu.getSchoolName());
+            stmt.setString(2, edu.getDegree());
+            stmt.setString(3, edu.getFieldOfStudy());
+            stmt.setString(4, edu.getStartYear());
+            stmt.setString(5, edu.getEndYear());
+            stmt.setString(6, edu.getDescription());
+            stmt.setInt(7, edu.getId());
+            stmt.setInt(8, edu.getProfileId()); // Đảm bảo cập nhật đúng của profile
+            rowUpdated = stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return rowUpdated;
+    }
+
+    public boolean deleteEducation(int educationId) {
+        String sql = "DELETE FROM educations WHERE id = ?";
+        boolean rowDeleted = false;
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, educationId);
+            rowDeleted = stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return rowDeleted;
+    }
 }
