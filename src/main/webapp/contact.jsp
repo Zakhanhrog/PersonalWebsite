@@ -9,12 +9,6 @@
     <div class="container">
         <div class="page-banner-content text-center">
             <h1 data-aos="fade-up">Liên Hệ</h1>
-            <div class="breadcrumbs" data-aos="fade-up" data-aos-delay="100">
-                <ul>
-                    <li><a href="${pageContext.request.contextPath}/">Trang Chủ</a></li>
-                    <li><span>Liên Hệ</span></li>
-                </ul>
-            </div>
         </div>
     </div>
 </section>

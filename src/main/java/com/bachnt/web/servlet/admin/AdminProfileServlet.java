@@ -14,18 +14,29 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.annotation.MultipartConfig;
+import javax.servlet.http.Part;
+import java.io.File;
 import java.io.IOException;
-import java.util.List;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
+import java.util.List;
+import java.util.UUID;
 
 @WebServlet("/admin/profile")
+@MultipartConfig(
+        fileSizeThreshold = 1024 * 1024 * 1,  // 1 MB
+        maxFileSize = 1024 * 1024 * 10, // 10 MB
+        maxRequestSize = 1024 * 1024 * 15 // 15 MB
+)
 public class AdminProfileServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private ProfileDAO profileDAO;
     private EducationDAO educationDAO;
     private ExperienceDAO experienceDAO;
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    private static final String UPLOAD_DIR_PROFILE = "uploads" + File.separator + "images" + File.separator + "profile";
 
     @Override
     public void init() throws ServletException {
@@ -65,6 +76,7 @@ public class AdminProfileServlet extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         HttpSession session = request.getSession();
         String action = request.getParameter("action");
+        String overallMessage = ""; // Dùng để gộp các thông báo
 
         if ("updateProfile".equals(action)) {
             try {
@@ -81,13 +93,61 @@ public class AdminProfileServlet extends HttpServlet {
                 profile.setPhoneNumber(request.getParameter("phoneNumber"));
                 profile.setEmail(request.getParameter("email"));
                 profile.setBio(request.getParameter("bio"));
-                profile.setPhotoUrl(request.getParameter("photoUrl"));
+
+                Part filePart = request.getPart("photoFile");
+                String currentPhotoUrl = profile.getPhotoUrl();
+                String newPhotoUrl = null;
+                boolean photoUpdatedOrDeleted = false;
+
+                if (filePart != null && filePart.getSize() > 0) {
+                    String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
+                    if (fileName != null && !fileName.isEmpty()) {
+                        String fileExtension = "";
+                        int i = fileName.lastIndexOf('.');
+                        if (i > 0) fileExtension = fileName.substring(i);
+                        String uniqueFileName = UUID.randomUUID().toString() + fileExtension;
+
+                        String applicationPath = getServletContext().getRealPath("");
+                        String uploadFilePathAbsolute = applicationPath + File.separator + UPLOAD_DIR_PROFILE;
+
+                        File uploadDir = new File(uploadFilePathAbsolute);
+                        if (!uploadDir.exists()) uploadDir.mkdirs();
+
+                        if (currentPhotoUrl != null && !currentPhotoUrl.isEmpty() && !currentPhotoUrl.contains("default")) {
+                            File oldFile = new File(applicationPath + File.separator + currentPhotoUrl.replaceFirst("^/", "").replace("/", File.separator));
+                            if (oldFile.exists()) oldFile.delete();
+                        }
+
+                        filePart.write(uploadFilePathAbsolute + File.separator + uniqueFileName);
+                        newPhotoUrl = "/" + UPLOAD_DIR_PROFILE.replace(File.separator, "/") + "/" + uniqueFileName;
+                        profile.setPhotoUrl(newPhotoUrl);
+                        photoUpdatedOrDeleted = true;
+                        overallMessage += "Ảnh đại diện đã được cập nhật. ";
+                    }
+                }
+
+                String deletePhotoFlag = request.getParameter("deletePhoto");
+                if ("true".equals(deletePhotoFlag) && newPhotoUrl == null) { // Chỉ xóa nếu không có ảnh mới được upload
+                    if (currentPhotoUrl != null && !currentPhotoUrl.isEmpty() && !currentPhotoUrl.contains("default")) {
+                        File oldFile = new File(getServletContext().getRealPath("") + File.separator + currentPhotoUrl.replaceFirst("^/", "").replace("/", File.separator));
+                        if (oldFile.exists()) oldFile.delete();
+                    }
+                    profile.setPhotoUrl(null);
+                    photoUpdatedOrDeleted = true;
+                    overallMessage += "Ảnh đại diện đã được xóa. ";
+                }
+
+                if (!photoUpdatedOrDeleted && newPhotoUrl == null) { // Không upload mới, không xóa, giữ ảnh cũ
+                    profile.setPhotoUrl(currentPhotoUrl);
+                }
+
 
                 boolean success = profileDAO.updateProfile(profile);
                 if (success) {
-                    session.setAttribute("profileUpdateMessage", "Thông tin hồ sơ đã được cập nhật thành công!");
+                    overallMessage += "Thông tin hồ sơ đã được cập nhật thành công!";
+                    session.setAttribute("profileUpdateMessage", overallMessage.trim());
                 } else {
-                    session.setAttribute("profileUpdateError", "Lỗi: Không thể cập nhật hồ sơ.");
+                    session.setAttribute("profileUpdateError", "Lỗi: Không thể cập nhật hồ sơ." + (photoUpdatedOrDeleted ? " (Lỗi cập nhật thông tin text)" : ""));
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -100,17 +160,12 @@ public class AdminProfileServlet extends HttpServlet {
                 skill.setName(request.getParameter("skillName"));
                 skill.setLevel(Integer.parseInt(request.getParameter("skillLevel")));
                 skill.setCategory(request.getParameter("skillCategory"));
-
                 boolean success = profileDAO.addSkill(skill);
-                if (success) {
-                    session.setAttribute("profileUpdateMessage", "Kỹ năng đã được thêm thành công!");
-                } else {
-                    session.setAttribute("profileUpdateError", "Lỗi: Không thể thêm kỹ năng.");
-                }
+                if (success) session.setAttribute("profileUpdateMessage", "Kỹ năng đã được thêm thành công!");
+                else session.setAttribute("profileUpdateError", "Lỗi: Không thể thêm kỹ năng.");
             } catch (NumberFormatException e){
                 session.setAttribute("profileUpdateError", "Lỗi: Level kỹ năng phải là số.");
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
                 session.setAttribute("profileUpdateError", "Lỗi hệ thống khi thêm kỹ năng: " + e.getMessage());
             }
@@ -118,15 +173,11 @@ public class AdminProfileServlet extends HttpServlet {
             try {
                 int skillId = Integer.parseInt(request.getParameter("skillId"));
                 boolean success = profileDAO.deleteSkill(skillId);
-                if (success) {
-                    session.setAttribute("profileUpdateMessage", "Kỹ năng đã được xóa thành công!");
-                } else {
-                    session.setAttribute("profileUpdateError", "Lỗi: Không thể xóa kỹ năng.");
-                }
+                if (success) session.setAttribute("profileUpdateMessage", "Kỹ năng đã được xóa thành công!");
+                else session.setAttribute("profileUpdateError", "Lỗi: Không thể xóa kỹ năng.");
             } catch (NumberFormatException e){
                 session.setAttribute("profileUpdateError", "Lỗi: ID kỹ năng không hợp lệ.");
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
                 session.setAttribute("profileUpdateError", "Lỗi hệ thống khi xóa kỹ năng: " + e.getMessage());
             }
@@ -140,7 +191,6 @@ public class AdminProfileServlet extends HttpServlet {
                 edu.setStartYear(request.getParameter("eduStartYear"));
                 edu.setEndYear(request.getParameter("eduEndYear"));
                 edu.setDescription(request.getParameter("eduDescription"));
-
                 boolean success = educationDAO.addEducation(edu);
                 if (success) session.setAttribute("profileUpdateMessage", "Học vấn đã được thêm!");
                 else session.setAttribute("profileUpdateError", "Lỗi: Không thể thêm học vấn.");
@@ -156,8 +206,7 @@ public class AdminProfileServlet extends HttpServlet {
                 else session.setAttribute("profileUpdateError", "Lỗi: Không thể xóa học vấn.");
             } catch (NumberFormatException e) {
                 session.setAttribute("profileUpdateError", "Lỗi: ID học vấn không hợp lệ.");
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
                 session.setAttribute("profileUpdateError", "Lỗi hệ thống khi xóa học vấn: " + e.getMessage());
             }
@@ -168,21 +217,17 @@ public class AdminProfileServlet extends HttpServlet {
                 exp.setCompanyName(request.getParameter("expCompanyName"));
                 exp.setPosition(request.getParameter("expPosition"));
                 exp.setDescriptionResponsibilities(request.getParameter("expDescription"));
-
                 String startDateStr = request.getParameter("expStartDate");
                 if (startDateStr != null && !startDateStr.isEmpty()) exp.setStartDate(dateFormat.parse(startDateStr));
-
                 String endDateStr = request.getParameter("expEndDate");
                 if (endDateStr != null && !endDateStr.isEmpty()) exp.setEndDate(dateFormat.parse(endDateStr));
                 else exp.setEndDate(null);
-
                 boolean success = experienceDAO.addExperience(exp);
                 if (success) session.setAttribute("profileUpdateMessage", "Kinh nghiệm đã được thêm!");
                 else session.setAttribute("profileUpdateError", "Lỗi: Không thể thêm kinh nghiệm.");
             } catch (ParseException pe) {
                 session.setAttribute("profileUpdateError", "Lỗi định dạng ngày tháng (yyyy-MM-dd) cho kinh nghiệm.");
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
                 session.setAttribute("profileUpdateError", "Lỗi hệ thống khi thêm kinh nghiệm: " + e.getMessage());
             }
@@ -194,8 +239,7 @@ public class AdminProfileServlet extends HttpServlet {
                 else session.setAttribute("profileUpdateError", "Lỗi: Không thể xóa kinh nghiệm.");
             } catch (NumberFormatException e) {
                 session.setAttribute("profileUpdateError", "Lỗi: ID kinh nghiệm không hợp lệ.");
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
                 session.setAttribute("profileUpdateError", "Lỗi hệ thống khi xóa kinh nghiệm: " + e.getMessage());
             }

@@ -23,16 +23,11 @@
     .table td .btn { padding: .25rem .5rem; font-size: .8rem; }
     .btn-block-custom { display: block; width: 100%; }
     label { font-weight: 500; margin-bottom: .3rem; }
+    .current-photo-preview { max-width: 150px; max-height: 150px; margin-bottom: 10px; border:1px solid #ddd; padding: 2px; background-color: #fff;}
   </style>
 </head>
 <body>
-<header class="admin-header">
-  <h1>Quản lý Hồ Sơ</h1>
-  <div>
-    <a href="${pageContext.request.contextPath}/admin" class="btn btn-light btn-sm"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-    <a href="${pageContext.request.contextPath}/" class="btn btn-info btn-sm" target="_blank"><i class="fas fa-eye"></i> Xem Website</a>
-  </div>
-</header>
+<jsp:include page="/admin/includes/admin-header.jsp" />
 
 <div class="container-fluid px-3">
   <c:if test="${not empty message}">
@@ -51,7 +46,7 @@
   <div class="card form-section">
     <div class="card-body">
       <h4 class="card-title-custom">Thông Tin Cá Nhân & Công Ty</h4>
-      <form action="${pageContext.request.contextPath}/admin/profile" method="post">
+      <form action="${pageContext.request.contextPath}/admin/profile" method="post" enctype="multipart/form-data">
         <input type="hidden" name="action" value="updateProfile">
         <div class="form-row">
           <div class="form-group col-md-6">
@@ -91,11 +86,28 @@
           <label for="bio">Giới thiệu bản thân (Bio)</label>
           <textarea class="form-control form-control-sm" id="bio" name="bio" rows="5"><c:out value='${profile.bio}'/></textarea>
         </div>
+
         <div class="form-group">
-          <label for="photoUrl">URL Ảnh đại diện</label>
-          <input type="text" class="form-control form-control-sm" id="photoUrl" name="photoUrl" value="<c:out value='${profile.photoUrl}'/>" placeholder="/resources/images/ten_anh.jpg">
-          <small class="form-text text-muted">Đường dẫn tương đối từ thư mục gốc webapp, ví dụ: /resources/images/profile.jpg</small>
+          <label>Ảnh đại diện hiện tại:</label><br>
+          <c:if test="${not empty profile.photoUrl}">
+            <img src="${pageContext.request.contextPath}${profile.photoUrl}" alt="Ảnh đại diện" class="current-photo-preview">
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="checkbox" name="deletePhoto" value="true" id="deletePhotoCheck">
+              <label class="form-check-label" for="deletePhotoCheck">
+                Xóa ảnh hiện tại (sẽ không có ảnh nếu không chọn ảnh mới)
+              </label>
+            </div>
+          </c:if>
+          <c:if test="${empty profile.photoUrl}">
+            <p class="text-muted small">Chưa có ảnh đại diện.</p>
+          </c:if>
         </div>
+        <div class="form-group">
+          <label for="photoFile">Chọn ảnh đại diện mới (nếu muốn thay đổi/thêm):</label>
+          <input type="file" class="form-control-file" id="photoFile" name="photoFile" accept="image/png, image/jpeg, image/gif">
+          <small class="form-text text-muted">Để trống nếu không muốn thay đổi ảnh. Ảnh tối đa 10MB.</small>
+        </div>
+
         <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Cập nhật Hồ Sơ</button>
       </form>
     </div>
@@ -243,7 +255,7 @@
                       <c:otherwise>Hiện tại</c:otherwise>
                     </c:choose>
                   </td>
-                  <td style="white-space: pre-line; max-width: 300px; overflow: auto;"><small><c:out value="${exp.descriptionResponsibilities}"/></small></td>
+                  <td style="white-space: pre-line; max-width: 300px; overflow-y: auto; max-height: 100px;"><small><c:out value="${exp.descriptionResponsibilities}"/></small></td>
                   <td>
                     <form action="${pageContext.request.contextPath}/admin/profile" method="post" style="display: inline;">
                       <input type="hidden" name="action" value="deleteExperience">

@@ -1,7 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %> <%-- Thêm fmt cho ngày tháng --%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <jsp:include page="/WEB-INF/includes/header.jsp" />
 
@@ -10,12 +10,6 @@
     <div class="container">
         <div class="page-banner-content text-center">
             <h1 data-aos="fade-up">Về Tôi</h1>
-            <div class="breadcrumbs" data-aos="fade-up" data-aos-delay="100">
-                <ul>
-                    <li><a href="${pageContext.request.contextPath}/">Trang Chủ</a></li>
-                    <li><span>Giới Thiệu</span></li>
-                </ul>
-            </div>
         </div>
     </div>
 </section>
@@ -116,7 +110,6 @@
     </section>
 </c:if>
 
-<!-- Education & Experience Section - SỬA ĐỔI TẠI ĐÂY -->
 <section class="timeline-section section-padding" id="experience">
     <div class="container">
         <div class="section-title text-center" data-aos="fade-up">
@@ -187,9 +180,7 @@
         </div>
     </div>
 </section>
-<!-- KẾT THÚC SỬA ĐỔI Education & Experience Section -->
 
-<!-- Testimonials Section - SỬA ĐỔI TẠI ĐÂY -->
 <c:if test="${not empty testimonialsList}">
     <section class="testimonials-area section-padding bg-light" id="testimonials">
         <div class="container">

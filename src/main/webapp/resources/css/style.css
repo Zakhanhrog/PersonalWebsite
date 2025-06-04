@@ -230,7 +230,6 @@ p {
 
 .navbar-toggler-icon {
     background-image: none;
-    /* Custom icon or keep default */
     display: inline-block;
     width: 1.5em;
     height: 1.5em;
@@ -257,26 +256,20 @@ p {
     bottom: 25%;
 }
 
-/* Add styles for toggler active state if needed */
-
-
 /* ===================================================================
     Hero Area
 =================================================================== */
 .hero-area {
-    background-image: linear-gradient(135deg, rgba(44, 62, 80, 0.85), rgba(52, 152, 219, 0.75)), url('../images/hero-bg.jpg');
-    /* Update path if needed */
+    background-image: linear-gradient(135deg, rgba(44, 62, 80, 0.85), rgba(52, 152, 219, 0.75)), url('../images/hero-bg.gif');
     background-size: cover;
     background-position: center center;
     background-attachment: fixed;
     color: var(--text-color-light);
     min-height: 90vh;
-    /* Use min-height for flexibility */
     display: flex;
     align-items: center;
     position: relative;
     padding-top: 100px;
-    /* Account for header */
 }
 
 .hero-text h1 {
@@ -523,13 +516,10 @@ p {
     Page Banner (for inner pages like About, Blog, etc.)
 =================================================================== */
 .page-banner {
-    padding: 120px 0 80px;
-    /* Adjust padding as needed */
+    padding: 120px 0 20px;
     background: linear-gradient(rgba(44, 62, 80, 0.7), rgba(44, 62, 80, 0.7)), url('../images/page-banner-bg.jpg') center center/cover no-repeat;
-    /* Update path */
     color: #fff;
     margin-top: 0;
-    /* Assuming header is fixed */
 }
 
 .page-banner-content h1 {
