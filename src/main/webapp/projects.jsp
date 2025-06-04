@@ -36,7 +36,7 @@
                             <div class="project-item">
                                 <div class="project-img">
                                         <%-- SỬA Ở ĐÂY --%>
-                                    <img src="${not empty project.imageUrl ? project.imageUrl : pageContext.request.contextPath += '/resources/images/default-project.jpg'}"
+                                    <img src="${not empty project.imageUrl ? (project.imageUrl.startsWith('http') ? project.imageUrl : pageContext.request.contextPath.concat(project.imageUrl)) : pageContext.request.contextPath.concat('/resources/images/default-project.jpg')}"
                                          alt="<c:out value='${project.title}'/>"
                                          onerror="this.src='${pageContext.request.contextPath}/resources/images/default-project-placeholder.jpg'; this.onerror=null;">
                                     <div class="project-overlay">

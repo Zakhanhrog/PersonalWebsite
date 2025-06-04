@@ -98,7 +98,8 @@
     <div class="form-group">
       <label>Ảnh đại diện hiện tại:</label><br>
       <c:if test="${not empty project.imageUrl}">
-        <img src="${project.imageUrl}" alt="Ảnh dự án" class="current-image-preview">
+        <img src="${not empty project.imageUrl ? (project.imageUrl.startsWith('http') ? project.imageUrl : pageContext.request.contextPath.concat(project.imageUrl)) : pageContext.request.contextPath.concat('/resources/images/default-project.jpg')}"
+             alt="Ảnh dự án" class="current-image-preview">
         <div class="form-check mb-2">
           <input class="form-check-input" type="checkbox" name="deleteImage" value="true" id="deleteProjectImageCheck">
           <label class="form-check-label" for="deleteProjectImageCheck">

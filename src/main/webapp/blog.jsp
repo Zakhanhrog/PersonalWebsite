@@ -26,12 +26,11 @@
                             <div class="blog-post-item" data-aos="fade-up" data-aos-delay="${100 * (loop.index % 3)}">
                                 <div class="blog-post-img">
                                     <a href="${pageContext.request.contextPath}/blog/post?id=${post.id}">
-                                            <%-- SỬA Ở ĐÂY: Bỏ pageContext.request.contextPath nếu imageUrl là đường dẫn ảo đầy đủ --%>
-                                        <img src="${not empty post.imageUrl ? post.imageUrl : pageContext.request.contextPath += '/resources/images/default-blog.jpg'}"
+                                        <img src="${not empty post.imageUrl ? (post.imageUrl.startsWith('http') ? post.imageUrl : pageContext.request.contextPath.concat(post.imageUrl)) : pageContext.request.contextPath.concat('/resources/images/default-blog-large.jpg')}"
                                              alt="<c:out value='${post.title}'/>"
                                              onerror="this.src='${pageContext.request.contextPath}/resources/images/default-blog-placeholder.jpg'; this.onerror=null;">
                                     </a>
-                                </div>
+                                </div>  
                                 <div class="blog-post-content">
                                     <div class="blog-post-meta">
                                         <span><i class="fas fa-user"></i> <c:out value="${post.author}"/></span>
@@ -65,9 +64,9 @@
                     <c:if test="${not empty profile}">
                         <div class="sidebar-widget author-widget" data-aos="fade-left" data-aos-delay="100">
                             <div class="author-widget-img">
-                                <img src="${not empty profile.photoUrl ? profile.photoUrl : pageContext.request.contextPath += '/resources/images/default-profile-sidebar.jpg'}"
-                                     alt="Ảnh của ${profile.name}"
-                                     onerror="this.src='${pageContext.request.contextPath}/resources/images/default-profile-sidebar-placeholder.jpg'; this.onerror=null;">
+                                <img src="${not empty profile.photoUrl ? (profile.photoUrl.startsWith('http') ? profile.photoUrl : pageContext.request.contextPath.concat(profile.photoUrl)) : pageContext.request.contextPath.concat('/resources/images/default-profile-full.jpg')}"
+                                alt="Ảnh của ${profile.name}"
+                                onerror="this.src='${pageContext.request.contextPath}/resources/images/default-profile-full-placeholder.jpg'; this.onerror=null;">
                             </div>
                             <h4><c:out value="${profile.name}"/></h4>
                             <p><c:out value="${profile.position}"/></p>
@@ -103,8 +102,7 @@
                                         <div class="recent-post-item">
                                             <div class="recent-post-img">
                                                 <a href="${pageContext.request.contextPath}/blog/post?id=${recentPost.id}">
-                                                        <%-- SỬA Ở ĐÂY: Bỏ pageContext.request.contextPath nếu imageUrl là đường dẫn ảo đầy đủ --%>
-                                                    <img src="${not empty recentPost.imageUrl ? recentPost.imageUrl : pageContext.request.contextPath += '/resources/images/default-blog-thumb.jpg'}"
+                                                    <img src="${not empty recentPost.imageUrl ? (recentPost.imageUrl.startsWith('http') ? recentPost.imageUrl : pageContext.request.contextPath.concat(recentPost.imageUrl)) : pageContext.request.contextPath.concat('/resources/images/default-blog-thumb.jpg')}"
                                                          alt="<c:out value='${recentPost.title}'/>"
                                                          onerror="this.src='${pageContext.request.contextPath}/resources/images/default-blog-thumb-placeholder.jpg'; this.onerror=null;">
                                                 </a>

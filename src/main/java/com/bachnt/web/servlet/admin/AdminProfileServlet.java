@@ -122,6 +122,7 @@ public class AdminProfileServlet extends HttpServlet {
                         filePart.write(uploadFilePathAbsolute + File.separator + uniqueFileName);
                         newPhotoUrl = URL_PATH_FOR_DB_AND_WEB + "/" + uniqueFileName;
                         profile.setPhotoUrl(newPhotoUrl);
+                        System.out.println("DEBUG: Đường dẫn vật lý của file: " + uploadFilePathAbsolute + File.separator + uniqueFileName);
                         System.out.println("DEBUG: Final photoUrl to be saved to DB: " + profile.getPhotoUrl());
                         photoUpdatedOrDeleted = true;
                         overallMessage += "Ảnh đại diện đã được cập nhật. ";

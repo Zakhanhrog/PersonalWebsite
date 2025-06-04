@@ -75,7 +75,8 @@
     <div class="form-group">
       <label>Ảnh đại diện hiện tại:</label><br>
       <c:if test="${not empty blogPost.imageUrl}">
-        <img src="${post.imageUrl}" alt="<c:out value='${post.title}'/>" class="current-image-preview">
+        <img src="${not empty blogPost.imageUrl ? (blogPost.imageUrl.startsWith('http') ? blogPost.imageUrl : pageContext.request.contextPath.concat(blogPost.imageUrl)) : pageContext.request.contextPath.concat('/resources/images/default-blog-thumb.jpg')}"
+             alt="<c:out value='${blogPost.title}'/>" class="current-image-preview">
         <div class="form-check mb-2">
           <input class="form-check-input" type="checkbox" name="deleteImage" value="true" id="deleteBlogImageCheck">
           <label class="form-check-label" for="deleteBlogImageCheck">

@@ -22,9 +22,9 @@
                 <div class="col-lg-5" data-aos="fade-right" data-aos-delay="100">
                     <div class="about-detail-img">
                             <%-- SỬA Ở ĐÂY --%>
-                        <img src="${not empty profile.photoUrl ? profile.photoUrl : pageContext.request.contextPath += '/resources/images/default-profile-full.jpg'}"
-                             alt="Ảnh của ${profile.name}"
-                             onerror="this.src='${pageContext.request.contextPath}/resources/images/default-profile-full-placeholder.jpg'; this.onerror=null;">
+                                <img src="${not empty profile.photoUrl ? (profile.photoUrl.startsWith('http') ? profile.photoUrl : pageContext.request.contextPath.concat(profile.photoUrl)) : pageContext.request.contextPath.concat('/resources/images/default-profile-full.jpg')}"
+                                     alt="Ảnh của ${profile.name}"
+                                     onerror="this.src='${pageContext.request.contextPath}/resources/images/default-profile-full-placeholder.jpg'; this.onerror=null;">
                     </div>
                 </div>
                 <div class="col-lg-7" data-aos="fade-left" data-aos-delay="200">
@@ -243,7 +243,7 @@
                         <div class="testimonial-item">
                             <div class="client-img">
                                     <%-- SỬA Ở ĐÂY --%>
-                                <img src="${not empty testimonial.clientImageUrl ? testimonial.clientImageUrl : 'https://ui-avatars.com/api/?name=' += fn:escapeXml(fn:replace(testimonial.clientName, ' ', '+')) += '&size=100&background=random'}"
+                                <img src="${not empty testimonial.clientImageUrl ? (testimonial.clientImageUrl.startsWith('http') ? testimonial.clientImageUrl : pageContext.request.contextPath.concat(testimonial.clientImageUrl)) : 'https://ui-avatars.com/api/?name='.concat(fn:escapeXml(fn:replace(testimonial.clientName, ' ', '+')))}&size=100&background=random"
                                      alt="Ảnh của ${testimonial.clientName}"
                                      onerror="this.src='https://ui-avatars.com/api/?name=${fn:escapeXml(fn:replace(testimonial.clientName, ' ', '+'))}&size=100&background=random&color=fff'; this.onerror=null;">
                             </div>

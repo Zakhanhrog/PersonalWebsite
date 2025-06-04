@@ -23,7 +23,7 @@
     .table td .btn { padding: .25rem .5rem; font-size: .8rem; }
     .btn-block-custom { display: block; width: 100%; }
     label { font-weight: 500; margin-bottom: .3rem; }
-    .current-photo-preview { max-width: 150px; max-height: 150px; margin-bottom: 10px; border:1px solid #ddd; padding: 2px; background-color: #fff;}
+    .current-photo-preview { max-width: 100px; max-height: 100px; margin-bottom: 10px; border:1px solid #ddd; padding: 2px; background-color: #fff;}
   </style>
 </head>
 <body>
@@ -90,8 +90,11 @@
         <div class="form-group">
           <label>Ảnh đại diện hiện tại:</label><br>
           <c:if test="${not empty profile.photoUrl}">
-            <img src="${profile.photoUrl}"
-                 alt="Ảnh của ${profile.name}">
+            <img src="${not empty profile.photoUrl ? (profile.photoUrl.startsWith('http') ? profile.photoUrl : pageContext.request.contextPath.concat(profile.photoUrl)) : pageContext.request.contextPath.concat('/resources/images/default-profile-full.jpg')}"
+                 alt="Ảnh của ${profile.name}"
+                 class="current-photo-preview"
+                 onerror="this.src='${pageContext.request.contextPath}/resources/images/default-profile-full-placeholder.jpg'; this.onerror=null;">
+            <div class="form-check mb-2">
               <input class="form-check-input" type="checkbox" name="deletePhoto" value="true" id="deletePhotoCheck">
               <label class="form-check-label" for="deletePhotoCheck">
                 Xóa ảnh hiện tại (sẽ không có ảnh nếu không chọn ảnh mới)

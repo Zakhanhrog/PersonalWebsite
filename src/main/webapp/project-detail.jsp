@@ -21,7 +21,7 @@
             <div class="row">
                 <div class="col-lg-8">
                     <div class="project-main-image" data-aos="fade-up">
-                        <img src="${not empty project.imageUrl ? project.imageUrl : pageContext.request.contextPath += '/resources/images/default-project-large.jpg'}"
+                        <img src="${not empty project.imageUrl ? (project.imageUrl.startsWith('http') ? project.imageUrl : pageContext.request.contextPath.concat(project.imageUrl)) : pageContext.request.contextPath.concat('/resources/images/default-project-large.jpg')}"
                              alt="<c:out value='${project.title}'/>"
                              onerror="this.src='${pageContext.request.contextPath}/resources/images/default-project-large-placeholder.jpg'; this.onerror=null;">
                     </div>
@@ -76,7 +76,7 @@
                                                 <div class="related-project-img">
                                                     <a href="${pageContext.request.contextPath}/projects/detail?id=${related.id}">
                                                             <%-- SỬA Ở ĐÂY --%>
-                                                        <img src="${not empty related.imageUrl ? related.imageUrl : pageContext.request.contextPath += '/resources/images/default-project-thumb.jpg'}"
+                                                        <img src="${not empty related.imageUrl ? (related.imageUrl.startsWith('http') ? related.imageUrl : pageContext.request.contextPath.concat(related.imageUrl)) : pageContext.request.contextPath.concat('/resources/images/default-project-thumb.jpg')}"
                                                              alt="<c:out value='${related.title}'/>"
                                                              onerror="this.src='${pageContext.request.contextPath}/resources/images/default-project-thumb-placeholder.jpg'; this.onerror=null;">
                                                     </a>

@@ -40,9 +40,9 @@
         <div class="row align-items-center">
             <div class="col-lg-5" data-aos="fade-right" data-aos-delay="100">
                 <div class="about-img">
-                    <img src="${not empty profile.photoUrl ? profile.photoUrl : pageContext.request.contextPath += '/resources/images/default-profile.jpg'}"
+                    <img src="${not empty profile.photoUrl ? (profile.photoUrl.startsWith('http') ? profile.photoUrl : pageContext.request.contextPath.concat(profile.photoUrl)) : pageContext.request.contextPath.concat('/resources/images/default-profile-full.jpg')}"
                          alt="Ảnh của ${profile.name}"
-                         onerror="this.src='${pageContext.request.contextPath}/resources/images/default-profile-placeholder.jpg'; this.onerror=null;">
+                         onerror="this.src='${pageContext.request.contextPath}/resources/images/default-profile-full-placeholder.jpg'; this.onerror=null;">
                 </div>
             </div>
             <div class="col-lg-7" data-aos="fade-left" data-aos-delay="200">

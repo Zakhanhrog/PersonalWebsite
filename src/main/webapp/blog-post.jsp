@@ -21,8 +21,7 @@
                 <div class="col-lg-8">
                     <article class="blog-post-full" data-aos="fade-up">
                         <div class="blog-post-full-img">
-                                <%-- SỬA Ở ĐÂY --%>
-                            <img src="${not empty blogPost.imageUrl ? blogPost.imageUrl : pageContext.request.contextPath += '/resources/images/default-blog-large.jpg'}"
+                            <img src="${not empty blogPost.imageUrl ? (blogPost.imageUrl.startsWith('http') ? blogPost.imageUrl : pageContext.request.contextPath.concat(blogPost.imageUrl)) : pageContext.request.contextPath.concat('/resources/images/default-blog-large.jpg')}"
                                  alt="<c:out value='${blogPost.title}'/>"
                                  onerror="this.src='${pageContext.request.contextPath}/resources/images/default-blog-large-placeholder.jpg'; this.onerror=null;">
                         </div>
@@ -67,7 +66,7 @@
                                 <div class="blog-post-author-box">
                                     <div class="author-img">
                                             <%-- SỬA Ở ĐÂY --%>
-                                        <img src="${not empty profile.photoUrl ? profile.photoUrl : pageContext.request.contextPath += '/resources/images/default-profile-author.jpg'}"
+                                        <img src="${not empty profile.photoUrl ? (profile.photoUrl.startsWith('http') ? profile.photoUrl : pageContext.request.contextPath.concat(profile.photoUrl)) : pageContext.request.contextPath.concat('/resources/images/default-profile-full.jpg')}"
                                              alt="Ảnh của ${profile.name}"
                                              onerror="this.src='${pageContext.request.contextPath}/resources/images/default-profile-author-placeholder.jpg'; this.onerror=null;">
                                     </div>
@@ -180,7 +179,8 @@
                     <aside class="blog-sidebar">
                         <c:if test="${not empty profile}">
                             <div class="sidebar-widget author-widget" data-aos="fade-left" data-aos-delay="100">
-                                <div class="author-widget-img"> <%-- SỬA Ở ĐÂY --%><img src="${not empty profile.photoUrl ? profile.photoUrl : pageContext.request.contextPath += '/resources/images/default-profile-sidebar.jpg'}" alt="Ảnh của ${profile.name}" onerror="this.src='${pageContext.request.contextPath}/resources/images/default-profile-sidebar-placeholder.jpg'; this.onerror=null;"></div>
+                                <div class="author-widget-img">
+                                    <img src="${not empty profile.photoUrl ? (profile.photoUrl.startsWith('http') ? profile.photoUrl : pageContext.request.contextPath.concat(profile.photoUrl)) : pageContext.request.contextPath.concat('/resources/images/default-profile-full.jpg')}"
                                 <h4>
                                     <c:out value="${profile.name}"/>
                                 </h4>
