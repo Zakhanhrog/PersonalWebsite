@@ -8,14 +8,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.bachnt.dao.ProfileDAO;
-import com.bachnt.dao.ProjectDAO; // For featured projects example
-import com.bachnt.dao.BlogPostDAO; // For recent blog posts example
+import com.bachnt.dao.ProjectDAO;
+import com.bachnt.dao.BlogPostDAO;
 import com.bachnt.model.Profile;
-import com.bachnt.model.Project;   // For featured projects example
-import com.bachnt.model.BlogPost;  // For recent blog posts example
-import java.util.List; // For lists of projects/posts
+import com.bachnt.model.Project;
+import com.bachnt.model.BlogPost;
+import java.util.List;
 
-@WebServlet("") // Mapped to root context path, e.g., http://localhost:8080/yourwebapp/
+@WebServlet("")
 public class HomeServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private ProfileDAO profileDAO;

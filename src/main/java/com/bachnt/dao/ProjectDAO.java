@@ -126,4 +126,18 @@ public class ProjectDAO {
         project.setLink(rs.getString("link"));
         return project;
     }
+    public int getTotalProjectCount() {
+        int count = 0;
+        String sql = "SELECT COUNT(*) FROM projects";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                count = rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace(); // Nên dùng logging
+        }
+        return count;
+    }
 }

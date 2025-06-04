@@ -20,22 +20,17 @@ public class ImageServlet extends HttpServlet {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
-        
         File file = new File(BASE_UPLOAD_DIR, requestedFile);
-        
         if (!file.exists() || !file.canRead()) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
-        
         String contentType = getServletContext().getMimeType(file.getName());
         if (contentType == null) {
             contentType = "application/octet-stream";
         }
         response.setContentType(contentType);
-        
         response.setContentLength((int) file.length());
-        
         try (InputStream in = Files.newInputStream(file.toPath());
              OutputStream out = response.getOutputStream()) {
             

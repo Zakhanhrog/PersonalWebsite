@@ -142,4 +142,19 @@ public class BlogPostDAO {
         blogPost.setStatus(rs.getString("status"));
         return blogPost;
     }
+
+    public int getTotalBlogPostCountAdmin() {
+        int count = 0;
+        String sql = "SELECT COUNT(*) FROM blog_posts";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                count = rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return count;
+    }
 }

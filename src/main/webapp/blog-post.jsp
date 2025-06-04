@@ -65,7 +65,6 @@
                             <c:if test="${not empty profile}">
                                 <div class="blog-post-author-box">
                                     <div class="author-img">
-                                            <%-- SỬA Ở ĐÂY --%>
                                         <img src="${not empty profile.photoUrl ? (profile.photoUrl.startsWith('http') ? profile.photoUrl : pageContext.request.contextPath.concat(profile.photoUrl)) : pageContext.request.contextPath.concat('/resources/images/default-profile-full.jpg')}"
                                              alt="Ảnh của ${profile.name}"
                                              onerror="this.src='${pageContext.request.contextPath}/resources/images/default-profile-author-placeholder.jpg'; this.onerror=null;">
@@ -180,7 +179,10 @@
                         <c:if test="${not empty profile}">
                             <div class="sidebar-widget author-widget" data-aos="fade-left" data-aos-delay="100">
                                 <div class="author-widget-img">
-                                    <img src="${not empty profile.photoUrl ? (profile.photoUrl.startsWith('http') ? profile.photoUrl : pageContext.request.contextPath.concat(profile.photoUrl)) : pageContext.request.contextPath.concat('/resources/images/default-profile-full.jpg')}"
+                                    <img src="${not empty profile.photoUrl ? (profile.photoUrl.startsWith('http') ? profile.photoUrl : pageContext.request.contextPath.concat(profile.photoUrl)) : pageContext.request.contextPath.concat('/resources/images/default-profile-sidebar.jpg')}"
+                                         alt="Ảnh của ${profile.name}"
+                                         onerror="this.src='${pageContext.request.contextPath}/resources/images/default-profile-sidebar-placeholder.jpg'; this.onerror=null;">
+                                </div>
                                 <h4>
                                     <c:out value="${profile.name}"/>
                                 </h4>
@@ -217,7 +219,13 @@
                                     <c:forEach items="${recentPosts}" var="recentPost">
                                         <li>
                                             <div class="recent-post-item">
-                                                <div class="recent-post-img"><a href="${pageContext.request.contextPath}/blog/post?id=${recentPost.id}"> <%-- SỬA Ở ĐÂY --%><img src="${not empty recentPost.imageUrl ? recentPost.imageUrl : pageContext.request.contextPath += '/resources/images/default-blog-thumb.jpg'}" alt="<c:out value='${recentPost.title}'/>" onerror="this.src='${pageContext.request.contextPath}/resources/images/default-blog-thumb-placeholder.jpg'; this.onerror=null;"></a></div>
+                                                <div class="recent-post-img">
+                                                    <a href="${pageContext.request.contextPath}/blog/post?id=${recentPost.id}">
+                                                        <img src="${not empty recentPost.imageUrl ? (recentPost.imageUrl.startsWith('http') ? recentPost.imageUrl : pageContext.request.contextPath.concat(recentPost.imageUrl)) : pageContext.request.contextPath.concat('/resources/images/default-blog-thumb.jpg')}"
+                                                             alt="<c:out value='${recentPost.title}'/>"
+                                                             onerror="this.src='${pageContext.request.contextPath}/resources/images/default-blog-thumb-placeholder.jpg'; this.onerror=null;">
+                                                    </a>
+                                                </div>
                                                 <div class="recent-post-content">
                                                     <h5>
                                                         <a href="${pageContext.request.contextPath}/blog/post?id=${recentPost.id}">

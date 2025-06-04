@@ -43,19 +43,19 @@
     <div class="row mb-4">
         <div class="col-md-4">
             <div class="stat-box text-center">
-                <div class="stat-value">${totalBlogPosts ne null ? totalBlogPosts : 0}</div>
+                <div class="stat-value"><c:out value="${totalBlogPosts ne null ? totalBlogPosts : 0}"/></div>
                 <p class="text-muted mb-0">Tổng số bài viết</p>
             </div>
         </div>
         <div class="col-md-4">
             <div class="stat-box text-center">
-                <div class="stat-value">${totalProjects ne null ? totalProjects : 0}</div>
+                <div class="stat-value"><c:out value="${totalProjects ne null ? totalProjects : 0}"/></div>
                 <p class="text-muted mb-0">Tổng số dự án</p>
             </div>
         </div>
         <div class="col-md-4">
             <div class="stat-box text-center">
-                <div class="stat-value">${unreadAdminMessageCount ne null ? unreadAdminMessageCount : 0}</div>
+                <div class="stat-value"><c:out value="${newMessagesCount ne null ? newMessagesCount : 0}"/></div>
                 <p class="text-muted mb-0">Tin nhắn mới</p>
             </div>
         </div>
@@ -109,6 +109,16 @@
                     <h5 class="card-title">Quản lý Bình Luận</h5>
                     <p class="card-text">Duyệt, sửa, xóa các bình luận trên blog.</p>
                     <a href="${pageContext.request.contextPath}/admin/comments" class="btn btn-primary">Truy cập</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mt-md-4">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <div class="card-icon"><i class="fas fa-star-half-alt"></i></div>
+                    <h5 class="card-title">Quản lý Đánh Giá</h5>
+                    <p class="card-text">Thêm, sửa, xóa các đánh giá từ đối tác/khách hàng.</p>
+                    <a href="${pageContext.request.contextPath}/admin/testimonials" class="btn btn-primary">Truy cập</a>
                 </div>
             </div>
         </div>

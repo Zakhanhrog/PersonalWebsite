@@ -21,7 +21,6 @@
             <div class="row align-items-center">
                 <div class="col-lg-5" data-aos="fade-right" data-aos-delay="100">
                     <div class="about-detail-img">
-                            <%-- SỬA Ở ĐÂY --%>
                                 <img src="${not empty profile.photoUrl ? (profile.photoUrl.startsWith('http') ? profile.photoUrl : pageContext.request.contextPath.concat(profile.photoUrl)) : pageContext.request.contextPath.concat('/resources/images/default-profile-full.jpg')}"
                                      alt="Ảnh của ${profile.name}"
                                      onerror="this.src='${pageContext.request.contextPath}/resources/images/default-profile-full-placeholder.jpg'; this.onerror=null;">
@@ -242,10 +241,17 @@
                     <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="${100 * loop.index}">
                         <div class="testimonial-item">
                             <div class="client-img">
-                                    <%-- SỬA Ở ĐÂY --%>
-                                <img src="${not empty testimonial.clientImageUrl ? (testimonial.clientImageUrl.startsWith('http') ? testimonial.clientImageUrl : pageContext.request.contextPath.concat(testimonial.clientImageUrl)) : 'https://ui-avatars.com/api/?name='.concat(fn:escapeXml(fn:replace(testimonial.clientName, ' ', '+')))}&size=100&background=random"
-                                     alt="Ảnh của ${testimonial.clientName}"
-                                     onerror="this.src='https://ui-avatars.com/api/?name=${fn:escapeXml(fn:replace(testimonial.clientName, ' ', '+'))}&size=100&background=random&color=fff'; this.onerror=null;">
+                                <c:choose>
+                                    <c:when test="${not empty testimonial.clientImageUrl}">
+                                        <img src="${testimonial.clientImageUrl.startsWith('http') ? testimonial.clientImageUrl : pageContext.request.contextPath.concat(testimonial.clientImageUrl)}"
+                                             alt="Ảnh của ${testimonial.clientName}"
+                                             onerror="this.src='https://ui-avatars.com/api/?name=${fn:escapeXml(fn:replace(testimonial.clientName, ' ', '+'))}&size=100&background=random&color=fff'; this.onerror=null;">
+                                    </c:when>
+                                    <c:otherwise>
+                                        <img src="https://ui-avatars.com/api/?name=${fn:escapeXml(fn:replace(testimonial.clientName, ' ', '+'))}&size=100&background=random"
+                                             alt="Ảnh của ${testimonial.clientName}">
+                                    </c:otherwise>
+                                </c:choose>
                             </div>
                             <div class="testimonial-text">
                                 <i class="fas fa-quote-left"></i>
