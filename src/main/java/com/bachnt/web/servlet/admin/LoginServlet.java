@@ -47,11 +47,15 @@ public class LoginServlet extends HttpServlet {
         User user = userDAO.getUserByUsername(username.trim());
 
         if (user != null && BCrypt.checkpw(password, user.getPasswordHash())) {
-            if ("admin".equalsIgnoreCase(user.getRole())) { // Kiểm tra vai trò admin
-                HttpSession session = request.getSession(); // Tạo session mới nếu chưa có
-                session.setAttribute("adminUser", user); // Lưu đối tượng User hoặc chỉ username
-                session.setMaxInactiveInterval(30 * 60); // Session timeout 30 phút
-                response.sendRedirect(request.getContextPath() + "/admin"); // Đến dashboard
+            if ("admin".equalsIgnoreCase(user.getRole())) {
+                HttpSession oldSession = request.getSession(false);
+                if (oldSession != null) {
+                    oldSession.invalidate();
+                }
+                HttpSession newSession = request.getSession(true);
+                newSession.setAttribute("adminUser", user);
+                newSession.setMaxInactiveInterval(30 * 60);
+                response.sendRedirect(request.getContextPath() + "/admin");
             } else {
                 request.setAttribute("loginError", "Tài khoản không có quyền truy cập admin.");
                 request.getRequestDispatcher("/admin/login.jsp").forward(request, response);

@@ -8,8 +8,17 @@
 
     <welcome-file-list>
         <welcome-file>index.jsp</welcome-file>
-        <!-- This will likely be overridden by HomeServlet mapped to "" -->
     </welcome-file-list>
+
+    <session-config>
+        <session-timeout>30</session-timeout>
+        <cookie-config>
+            <http-only>true</http-only>
+            <secure>true</secure>
+        </cookie-config>
+        <tracking-mode>COOKIE</tracking-mode>
+    </session-config>
+
     <filter>
         <filter-name>CharacterEncodingFilter</filter-name>
         <filter-class>org.apache.catalina.filters.SetCharacterEncodingFilter</filter-class>

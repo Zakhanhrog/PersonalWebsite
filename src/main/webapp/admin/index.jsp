@@ -132,7 +132,7 @@
                 <p class="mb-0">© ${java.time.Year.now().getValue()} <c:out value="${profileAdmin.name ne null ? profileAdmin.name : 'Admin Panel'}" />. Đã đăng ký bản quyền.</p>
             </div>
             <div class="col-md-6 text-md-right">
-                <p class="mb-0">Phiên bản Quản trị 1.0.0</p>
+                <p class="mb-0">Phiên bản Quản trị 1.0.1</p>
             </div>
         </div>
     </div>
