@@ -10,18 +10,32 @@
   <title>${formAction == 'add' ? 'Thêm Bài Viết Mới' : 'Chỉnh Sửa Bài Viết'}</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-  <%-- CSS cho editor nếu có, ví dụ CKEditor --%>
+  <style>
+    .current-image-preview { max-width: 200px; max-height: 150px; margin-bottom: 10px; border:1px solid #ddd; padding: 2px; background-color: #fff;}
+  </style>
 </head>
 <body>
-<header class="bg-dark text-white p-3 mb-4">
-  <div class="container d-flex justify-content-between align-items-center">
-    <h3>${formAction == 'add' ? 'Thêm Bài Viết Mới' : 'Chỉnh Sửa Bài Viết'}</h3>
-    <a href="${pageContext.request.contextPath}/admin/blog" class="btn btn-light btn-sm"><i class="fas fa-list"></i> Danh sách bài viết</a>
-  </div>
-</header>
+<jsp:include page="/admin/includes/admin-header.jsp" />
 
-<div class="container">
-  <form action="${pageContext.request.contextPath}/admin/blog" method="post">
+<div class="container mt-4">
+  <h3>${formAction == 'add' ? 'Thêm Bài Viết Mới' : 'Chỉnh Sửa Bài Viết'}</h3>
+  <hr/>
+  <c:if test="${not empty sessionScope.blogMessageError}">
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      <c:out value="${sessionScope.blogMessageError}"/>
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+      <c:remove var="blogMessageError" scope="session"/>
+    </div>
+  </c:if>
+  <c:if test="${not empty requestScope.messageError}"> <%-- For errors not from session redirect --%>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      <c:out value="${requestScope.messageError}"/>
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+  </c:if>
+
+
+  <form action="${pageContext.request.contextPath}/admin/blog" method="post" enctype="multipart/form-data">
     <input type="hidden" name="action" value="save">
     <c:if test="${formAction == 'edit'}">
       <input type="hidden" name="id" value="${blogPost.id}">
@@ -40,7 +54,6 @@
     <div class="form-group">
       <label for="content">Nội dung *</label>
       <textarea class="form-control" id="content" name="content" rows="10" required><c:out value='${blogPost.content}'/></textarea>
-      <%-- Có thể thay bằng CKEditor ở đây --%>
     </div>
 
     <div class="form-row">
@@ -54,23 +67,37 @@
       </div>
     </div>
 
-    <div class="form-row">
-      <div class="form-group col-md-6">
-        <label for="tags">Tags (cách nhau bởi dấu phẩy)</label>
-        <input type="text" class="form-control" id="tags" name="tags" value="<c:out value='${blogPost.tags}'/>" placeholder="Ví dụ: tag1, tag2, tag mới">
-      </div>
-      <div class="form-group col-md-6">
-        <label for="imageUrl">URL Ảnh đại diện</label>
-        <input type="text" class="form-control" id="imageUrl" name="imageUrl" value="<c:out value='${blogPost.imageUrl}'/>" placeholder="/resources/images/blog/anh.jpg">
-        <small class="form-text text-muted">Đường dẫn tương đối. Ví dụ: /resources/images/blog/my-post.jpg</small>
-      </div>
+    <div class="form-group">
+      <label for="tags">Tags (cách nhau bởi dấu phẩy)</label>
+      <input type="text" class="form-control" id="tags" name="tags" value="<c:out value='${blogPost.tags}'/>" placeholder="Ví dụ: tag1, tag2, tag mới">
+    </div>
+
+    <div class="form-group">
+      <label>Ảnh đại diện hiện tại:</label><br>
+      <c:if test="${not empty blogPost.imageUrl}">
+        <img src="${post.imageUrl}" alt="<c:out value='${post.title}'/>" class="current-image-preview">
+        <div class="form-check mb-2">
+          <input class="form-check-input" type="checkbox" name="deleteImage" value="true" id="deleteBlogImageCheck">
+          <label class="form-check-label" for="deleteBlogImageCheck">
+            Xóa ảnh hiện tại
+          </label>
+        </div>
+      </c:if>
+      <c:if test="${empty blogPost.imageUrl}">
+        <p class="text-muted small">Chưa có ảnh đại diện.</p>
+      </c:if>
+    </div>
+    <div class="form-group">
+      <label for="imageFile">Chọn ảnh mới (nếu muốn thay đổi/thêm):</label>
+      <input type="file" class="form-control-file" id="imageFile" name="imageFile" accept="image/png, image/jpeg, image/gif">
+      <small class="form-text text-muted">Để trống nếu không muốn thay đổi. Tối đa 10MB.</small>
     </div>
 
     <div class="form-group">
       <label for="status">Trạng thái</label>
       <select class="form-control" id="status" name="status">
         <option value="draft" ${blogPost.status == 'draft' ? 'selected' : ''}>Bản nháp</option>
-        <option value="published" ${blogPost.status == 'published' || empty blogPost.status ? 'selected' : ''}>Đã xuất bản</option>
+        <option value="published" ${blogPost.status == 'published' || (empty blogPost.status && formAction == 'add') ? 'selected' : ''}>Đã xuất bản</option>
         <option value="archived" ${blogPost.status == 'archived' ? 'selected' : ''}>Lưu trữ</option>
       </select>
     </div>
@@ -84,9 +111,17 @@
   <p class="mb-0">© ${java.time.Year.now().getValue()} Admin Panel</p>
 </footer>
 
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <%-- THAY ĐỔI Ở ĐÂY --%>
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
+<script>
+  $(document).ready(function() { // Đảm bảo DOM sẵn sàng
+    window.setTimeout(function() {
+      $(".alert-success, .alert-danger").fadeTo(500, 0).slideUp(500, function(){
+        $(this).remove();
+      });
+    }, 7000);
+  });
+</script>
 </body>
 </html>

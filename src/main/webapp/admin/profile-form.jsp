@@ -90,8 +90,8 @@
         <div class="form-group">
           <label>Ảnh đại diện hiện tại:</label><br>
           <c:if test="${not empty profile.photoUrl}">
-            <img src="${pageContext.request.contextPath}${profile.photoUrl}" alt="Ảnh đại diện" class="current-photo-preview">
-            <div class="form-check mb-2">
+            <img src="${profile.photoUrl}"
+                 alt="Ảnh của ${profile.name}">
               <input class="form-check-input" type="checkbox" name="deletePhoto" value="true" id="deletePhotoCheck">
               <label class="form-check-label" for="deletePhotoCheck">
                 Xóa ảnh hiện tại (sẽ không có ảnh nếu không chọn ảnh mới)
@@ -280,15 +280,17 @@
   <p class="mb-0">© ${java.time.Year.now().getValue()} Admin Panel - PersonalWebsite</p>
 </footer>
 
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script>
-  window.setTimeout(function() {
-    $(".alert-success, .alert-danger").fadeTo(500, 0).slideUp(500, function(){
-      $(this).remove();
-    });
-  }, 7000);
+  $(document).ready(function() {
+    window.setTimeout(function() {
+      $(".alert-success, .alert-danger").fadeTo(500, 0).slideUp(500, function(){
+        $(this).remove();
+      });
+    }, 7000);
+  });
 </script>
 </body>
 </html>

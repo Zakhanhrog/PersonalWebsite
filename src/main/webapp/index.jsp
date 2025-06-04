@@ -5,7 +5,6 @@
 
 <jsp:include page="/WEB-INF/includes/header.jsp" />
 
-
 <!-- Hero Section -->
 <section class="hero-area" id="home">
     <div class="container">
@@ -41,7 +40,7 @@
         <div class="row align-items-center">
             <div class="col-lg-5" data-aos="fade-right" data-aos-delay="100">
                 <div class="about-img">
-                    <img src="${pageContext.request.contextPath}${not empty profile.photoUrl ? profile.photoUrl : '/resources/images/default-profile.jpg'}"
+                    <img src="${not empty profile.photoUrl ? profile.photoUrl : pageContext.request.contextPath += '/resources/images/default-profile.jpg'}"
                          alt="Ảnh của ${profile.name}"
                          onerror="this.src='${pageContext.request.contextPath}/resources/images/default-profile-placeholder.jpg'; this.onerror=null;">
                 </div>
@@ -84,27 +83,9 @@
             <h2>Lĩnh Vực Hoạt Động Chính</h2>
         </div>
         <div class="row">
-            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
-                <div class="feature-box">
-                    <div class="feature-icon"><i class="fas fa-building"></i></div>
-                    <h4>Bất Động Sản</h4>
-                    <p>Phát triển các dự án bất động sản cao cấp, khu đô thị, và các giải pháp nhà ở sáng tạo.</p>
-                </div>
-            </div>
-            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
-                <div class="feature-box">
-                    <div class="feature-icon"><i class="fas fa-industry"></i></div>
-                    <h4>Phát Triển Công Nghiệp</h4>
-                    <p>Đầu tư và phát triển các khu công nghiệp hiện đại, thu hút đầu tư và tạo việc làm.</p>
-                </div>
-            </div>
-            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
-                <div class="feature-box">
-                    <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
-                    <h4>Đầu Tư Tài Chính</h4>
-                    <p>Cung cấp các giải pháp đầu tư tài chính thông minh, tối ưu hóa lợi nhuận và quản lý rủi ro.</p>
-                </div>
-            </div>
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100"><div class="feature-box"><div class="feature-icon"><i class="fas fa-building"></i></div><h4>Bất Động Sản</h4><p>Phát triển các dự án bất động sản cao cấp, khu đô thị, và các giải pháp nhà ở sáng tạo.</p></div></div>
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200"><div class="feature-box"><div class="feature-icon"><i class="fas fa-industry"></i></div><h4>Phát Triển Công Nghiệp</h4><p>Đầu tư và phát triển các khu công nghiệp hiện đại, thu hút đầu tư và tạo việc làm.</p></div></div>
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300"><div class="feature-box"><div class="feature-icon"><i class="fas fa-chart-line"></i></div><h4>Đầu Tư Tài Chính</h4><p>Cung cấp các giải pháp đầu tư tài chính thông minh, tối ưu hóa lợi nhuận và quản lý rủi ro.</p></div></div>
         </div>
     </div>
 </section>
@@ -120,7 +101,8 @@
                     <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="${100 * loop.index}">
                         <div class="project-item-preview">
                             <div class="project-img">
-                                <img src="${pageContext.request.contextPath}${not empty project.imageUrl ? project.imageUrl : '/resources/images/default-project.jpg'}"
+                                    <%-- SỬA Ở ĐÂY: Bỏ pageContext.request.contextPath nếu imageUrl là đường dẫn ảo đầy đủ --%>
+                                <img src="${not empty project.imageUrl ? project.imageUrl : pageContext.request.contextPath += '/resources/images/default-project.jpg'}"
                                      alt="<c:out value='${project.title}'/>"
                                      onerror="this.src='${pageContext.request.contextPath}/resources/images/default-project-placeholder.jpg'; this.onerror=null;">
                                 <div class="project-overlay">
@@ -155,7 +137,7 @@
                     <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="${100 * loop.index}">
                         <div class="blog-post-preview">
                             <div class="blog-img">
-                                <img src="${pageContext.request.contextPath}${not empty post.imageUrl ? post.imageUrl : '/resources/images/default-blog.jpg'}"
+                                <img src="${not empty post.imageUrl ? post.imageUrl : pageContext.request.contextPath += '/resources/images/default-blog.jpg'}"
                                      alt="<c:out value='${post.title}'/>"
                                      onerror="this.src='${pageContext.request.contextPath}/resources/images/default-blog-placeholder.jpg'; this.onerror=null;">
                             </div>

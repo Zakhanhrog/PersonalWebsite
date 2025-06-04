@@ -36,7 +36,8 @@ public class AdminProfileServlet extends HttpServlet {
     private EducationDAO educationDAO;
     private ExperienceDAO experienceDAO;
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-    private static final String UPLOAD_DIR_PROFILE = "uploads" + File.separator + "images" + File.separator + "profile";
+    private static final String UPLOAD_DIR_PROFILE_ABSOLUTE = "/Users/ngogiakhanh/Documents/PersonalWebsite/PersonalWebsiteUploads/profile";
+    private static final String URL_PATH_FOR_DB_AND_WEB = "/my-uploaded-images/profile";
 
     @Override
     public void init() throws ServletException {
@@ -108,7 +109,7 @@ public class AdminProfileServlet extends HttpServlet {
                         String uniqueFileName = UUID.randomUUID().toString() + fileExtension;
 
                         String applicationPath = getServletContext().getRealPath("");
-                        String uploadFilePathAbsolute = applicationPath + File.separator + UPLOAD_DIR_PROFILE;
+                        String uploadFilePathAbsolute = UPLOAD_DIR_PROFILE_ABSOLUTE;
 
                         File uploadDir = new File(uploadFilePathAbsolute);
                         if (!uploadDir.exists()) uploadDir.mkdirs();
@@ -119,8 +120,9 @@ public class AdminProfileServlet extends HttpServlet {
                         }
 
                         filePart.write(uploadFilePathAbsolute + File.separator + uniqueFileName);
-                        newPhotoUrl = "/" + UPLOAD_DIR_PROFILE.replace(File.separator, "/") + "/" + uniqueFileName;
+                        newPhotoUrl = URL_PATH_FOR_DB_AND_WEB + "/" + uniqueFileName;
                         profile.setPhotoUrl(newPhotoUrl);
+                        System.out.println("DEBUG: Final photoUrl to be saved to DB: " + profile.getPhotoUrl());
                         photoUpdatedOrDeleted = true;
                         overallMessage += "Ảnh đại diện đã được cập nhật. ";
                     }
@@ -137,7 +139,7 @@ public class AdminProfileServlet extends HttpServlet {
                     overallMessage += "Ảnh đại diện đã được xóa. ";
                 }
 
-                if (!photoUpdatedOrDeleted && newPhotoUrl == null) { // Không upload mới, không xóa, giữ ảnh cũ
+                if (!photoUpdatedOrDeleted && newPhotoUrl == null) {
                     profile.setPhotoUrl(currentPhotoUrl);
                 }
 

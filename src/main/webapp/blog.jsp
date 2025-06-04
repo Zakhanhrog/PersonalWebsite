@@ -26,7 +26,8 @@
                             <div class="blog-post-item" data-aos="fade-up" data-aos-delay="${100 * (loop.index % 3)}">
                                 <div class="blog-post-img">
                                     <a href="${pageContext.request.contextPath}/blog/post?id=${post.id}">
-                                        <img src="${pageContext.request.contextPath}${not empty post.imageUrl ? post.imageUrl : '/resources/images/default-blog.jpg'}"
+                                            <%-- SỬA Ở ĐÂY: Bỏ pageContext.request.contextPath nếu imageUrl là đường dẫn ảo đầy đủ --%>
+                                        <img src="${not empty post.imageUrl ? post.imageUrl : pageContext.request.contextPath += '/resources/images/default-blog.jpg'}"
                                              alt="<c:out value='${post.title}'/>"
                                              onerror="this.src='${pageContext.request.contextPath}/resources/images/default-blog-placeholder.jpg'; this.onerror=null;">
                                     </a>
@@ -61,11 +62,10 @@
             <!-- Sidebar -->
             <div class="col-lg-4">
                 <aside class="blog-sidebar">
-                    <!-- Author Widget -->
                     <c:if test="${not empty profile}">
                         <div class="sidebar-widget author-widget" data-aos="fade-left" data-aos-delay="100">
                             <div class="author-widget-img">
-                                <img src="${pageContext.request.contextPath}${not empty profile.photoUrl ? profile.photoUrl : '/resources/images/default-profile-sidebar.jpg'}"
+                                <img src="${not empty profile.photoUrl ? profile.photoUrl : pageContext.request.contextPath += '/resources/images/default-profile-sidebar.jpg'}"
                                      alt="Ảnh của ${profile.name}"
                                      onerror="this.src='${pageContext.request.contextPath}/resources/images/default-profile-sidebar-placeholder.jpg'; this.onerror=null;">
                             </div>
@@ -79,7 +79,6 @@
                         </div>
                     </c:if>
 
-                    <!-- Categories Widget -->
                     <c:if test="${not empty categoriesCount}">
                         <div class="sidebar-widget category-widget" data-aos="fade-left" data-aos-delay="200">
                             <h4 class="widget-title">Danh Mục</h4>
@@ -95,7 +94,6 @@
                         </div>
                     </c:if>
 
-                    <!-- Recent Posts Widget -->
                     <c:if test="${not empty recentPosts}">
                         <div class="sidebar-widget recent-posts-widget" data-aos="fade-left" data-aos-delay="300">
                             <h4 class="widget-title">Bài Viết Mới</h4>
@@ -105,7 +103,8 @@
                                         <div class="recent-post-item">
                                             <div class="recent-post-img">
                                                 <a href="${pageContext.request.contextPath}/blog/post?id=${recentPost.id}">
-                                                    <img src="${pageContext.request.contextPath}${not empty recentPost.imageUrl ? recentPost.imageUrl : '/resources/images/default-blog-thumb.jpg'}"
+                                                        <%-- SỬA Ở ĐÂY: Bỏ pageContext.request.contextPath nếu imageUrl là đường dẫn ảo đầy đủ --%>
+                                                    <img src="${not empty recentPost.imageUrl ? recentPost.imageUrl : pageContext.request.contextPath += '/resources/images/default-blog-thumb.jpg'}"
                                                          alt="<c:out value='${recentPost.title}'/>"
                                                          onerror="this.src='${pageContext.request.contextPath}/resources/images/default-blog-thumb-placeholder.jpg'; this.onerror=null;">
                                                 </a>
@@ -121,7 +120,6 @@
                         </div>
                     </c:if>
 
-                    <!-- Tags Widget -->
                     <c:if test="${not empty allTags}">
                         <div class="sidebar-widget tags-widget" data-aos="fade-left" data-aos-delay="400">
                             <h4 class="widget-title">Tags</h4>
