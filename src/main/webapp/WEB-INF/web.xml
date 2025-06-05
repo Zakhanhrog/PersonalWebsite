@@ -47,32 +47,32 @@
         <dispatcher>FORWARD</dispatcher>
     </filter-mapping>
     
-    <filter>
-        <filter-name>CSRFPreventionFilter</filter-name>
-        <filter-class>org.apache.catalina.filters.CsrfPreventionFilter</filter-class>
-        <init-param>
-            <param-name>entryPoints</param-name>
-            <param-value>
-                /admin/login,
-                /admin/login.jsp,
-                /admin,
-                /admin/profile,
-                /admin/blog, /admin/blog?action=add, /admin/blog?action=edit,
-                /admin/projects, /admin/projects?action=add, /admin/projects?action=edit,
-                /admin/messages,
-                /admin/comments, /admin/comments?action=editForm,
-                /admin/testimonials, /admin/testimonials?action=add, /admin/testimonials?action=edit,
-                /admin/users, /admin/users?action=addForm, /admin/users?action=editForm
-            </param-value>
-        </init-param>
+<!--    <filter>-->
+<!--        <filter-name>CSRFPreventionFilter</filter-name>-->
+<!--        <filter-class>org.apache.catalina.filters.CsrfPreventionFilter</filter-class>-->
+<!--        <init-param>-->
+<!--            <param-name>entryPoints</param-name>-->
+<!--            <param-value>-->
+<!--                /admin/login,-->
+<!--                /admin/login.jsp,-->
+<!--                /admin,-->
+<!--                /admin/profile,-->
+<!--                /admin/blog, /admin/blog?action=add, /admin/blog?action=edit,-->
+<!--                /admin/projects, /admin/projects?action=add, /admin/projects?action=edit,-->
+<!--                /admin/messages,-->
+<!--                /admin/comments, /admin/comments?action=editForm,-->
+<!--                /admin/testimonials, /admin/testimonials?action=add, /admin/testimonials?action=edit,-->
+<!--                /admin/users, /admin/users?action=addForm, /admin/users?action=editForm-->
+<!--            </param-value>-->
+<!--        </init-param>-->
 
-    </filter>
-    <filter-mapping>
-        <filter-name>CSRFPreventionFilter</filter-name>
-        <url-pattern>/admin/*</url-pattern>
-        <dispatcher>REQUEST</dispatcher>
-        <dispatcher>FORWARD</dispatcher>
-    </filter-mapping>
+<!--    </filter>-->
+<!--    <filter-mapping>-->
+<!--        <filter-name>CSRFPreventionFilter</filter-name>-->
+<!--        <url-pattern>/admin/*</url-pattern>-->
+<!--        <dispatcher>REQUEST</dispatcher>-->
+<!--        <dispatcher>FORWARD</dispatcher>-->
+<!--    </filter-mapping>-->
 
     <servlet>
         <servlet-name>ImageServlet</servlet-name>

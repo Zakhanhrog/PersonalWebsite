@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'war'
 }
+import org.gradle.api.file.DuplicatesStrategy
 
 group 'com'
 version '1.0-SNAPSHOT'
@@ -12,6 +13,8 @@ repositories {
 
 ext {
     junitVersion = '5.10.2'
+    webappRunnerVersion = '9.0.27.1'
+    postgresqlVersion = '42.7.3'
 }
 
 sourceCompatibility = JavaVersion.VERSION_17
@@ -21,21 +24,42 @@ tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
 
+configurations {
+    webappRunnerLibs
+}
+
 dependencies {
     providedCompile 'javax.servlet:javax.servlet-api:4.0.1'
     providedCompile 'javax.servlet.jsp:javax.servlet.jsp-api:2.3.3'
     implementation 'javax.servlet:jstl:1.2'
+
     implementation 'mysql:mysql-connector-java:8.0.33'
+    implementation "org.postgresql:postgresql:${postgresqlVersion}"
+
     implementation 'org.mindrot:jbcrypt:0.4'
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
 
     implementation 'org.slf4j:slf4j-api:1.7.36'
     implementation 'ch.qos.logback:logback-classic:1.2.13'
-    providedCompile 'org.apache.tomcat.embed:tomcat-embed-core:9.0.105'
+
+    webappRunnerLibs "com.github.jsimone:webapp-runner:${webappRunnerVersion}"
 }
 
 test {
     useJUnitPlatform()
+}
+
+task copyWebappRunner(type: Copy) {
+    from configurations.webappRunnerLibs
+    into "$buildDir/libs"
+    rename { String fileName -> "webapp-runner.jar" }
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
+war.dependsOn copyWebappRunner
+
+war {
+    archiveFileName = 'PersonalWebsite-1.0-SNAPSHOT.war'
 }
