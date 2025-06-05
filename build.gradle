@@ -63,3 +63,5 @@ war.dependsOn copyWebappRunner
 war {
     archiveFileName = 'PersonalWebsite-1.0-SNAPSHOT.war'
 }
+task stage(dependsOn: ['build', 'copyWebappRunner'])
+build.mustRunAfter clean
