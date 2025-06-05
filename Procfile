@@ -1,1 +1,1 @@
-web: java -jar build/libs/PersonalWebsite-1.0-SNAPSHOT.war
+web: bash -c 'catalina.sh run'
