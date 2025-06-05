@@ -1,42 +1,47 @@
-.gradle
+# Gradle
+.gradle/
 build/
-!gradle/wrapper/gradle-wrapper.jar
-!**/src/main/**/build/
-!**/src/test/**/build/
+# Dòng dưới đây là tùy chọn. Nếu bạn giữ gradle wrapper (gradlew, gradlew.bat, gradle/), 
+# thì bỏ comment dòng dưới để giữ lại file jar của wrapper.
+# Render có thể tự cài đặt Gradle, nên việc bỏ qua hoàn toàn thư mục gradle/ và các file gradlew* cũng là một lựa chọn.
+# !gradle/wrapper/gradle-wrapper.jar 
 
-### IntelliJ IDEA ###
-.idea/modules.xml
-.idea/jarRepositories.xml
-.idea/compiler.xml
-.idea/libraries/
-*.iws
+# IntelliJ IDEA
+.idea/
 *.iml
 *.ipr
+*.iws
 out/
-!**/src/main/**/out/
-!**/src/test/**/out/
 
-### Eclipse ###
-.apt_generated
+# NetBeans
+nbproject/private/
+# build/ (đã có ở trên cho Gradle)
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# Eclipse
+.settings/
 .classpath
-.factorypath
 .project
-.settings
-.springBeans
-.sts4-cache
-bin/
-!**/src/main/**/bin/
-!**/src/test/**/bin/
+target/ # Thư mục build của Maven/Eclipse, có thể không cần nếu bạn chỉ dùng Gradle
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-
-### VS Code ###
-.vscode/
-
-### Mac OS ###
+# macOS
 .DS_Store
+
+# Logs
+logs/
+*.log
+
+# Uploads directory - RẤT QUAN TRỌNG
+# Thư mục này chứa dữ liệu người dùng upload và KHÔNG BAO GIỜ nên được commit.
+# Đường dẫn này phải khớp với thư mục gốc chứa các thư mục con như blog_posts, profile, etc.
+# Dựa trên cấu trúc bạn cung cấp, nó là PersonalWebsiteUploads ở thư mục gốc của project.
+PersonalWebsiteUploads/ 
+
+# Local environment specific files
+local.properties
+# Bất kỳ file cấu hình local hoặc chứa thông tin nhạy cảm nào khác
+# Ví dụ: nếu bạn có file chứa password DB local không muốn commit
+# db_local_config.properties 

@@ -21,7 +21,24 @@
                 <div class="col-lg-8">
                     <article class="blog-post-full" data-aos="fade-up">
                         <div class="blog-post-full-img">
-                            <img src="${not empty blogPost.imageUrl ? (blogPost.imageUrl.startsWith('http') ? blogPost.imageUrl : pageContext.request.contextPath.concat(blogPost.imageUrl)) : pageContext.request.contextPath.concat('/resources/images/default-blog-large.jpg')}"
+                            <c:set var="blogPostFullImageSource">
+                                <c:choose>
+                                    <c:when test="${not empty blogPost.imageUrl}">
+                                        <c:choose>
+                                            <c:when test="${fn:startsWith(blogPost.imageUrl, 'http')}">
+                                                ${blogPost.imageUrl}
+                                            </c:when>
+                                            <c:otherwise>
+                                                ${pageContext.request.contextPath}/uploads/${blogPost.imageUrl}
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </c:when>
+                                    <c:otherwise>
+                                        ${pageContext.request.contextPath}/resources/images/default-blog-large.jpg
+                                    </c:otherwise>
+                                </c:choose>
+                            </c:set>
+                            <img src="${blogPostFullImageSource}"
                                  alt="<c:out value='${blogPost.title}'/>"
                                  onerror="this.src='${pageContext.request.contextPath}/resources/images/default-blog-large-placeholder.jpg'; this.onerror=null;">
                         </div>
@@ -65,7 +82,24 @@
                             <c:if test="${not empty profile}">
                                 <div class="blog-post-author-box">
                                     <div class="author-img">
-                                        <img src="${not empty profile.photoUrl ? (profile.photoUrl.startsWith('http') ? profile.photoUrl : pageContext.request.contextPath.concat(profile.photoUrl)) : pageContext.request.contextPath.concat('/resources/images/default-profile-full.jpg')}"
+                                        <c:set var="authorBoxImageSource">
+                                            <c:choose>
+                                                <c:when test="${not empty profile.photoUrl}">
+                                                    <c:choose>
+                                                        <c:when test="${fn:startsWith(profile.photoUrl, 'http')}">
+                                                            ${profile.photoUrl}
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            ${pageContext.request.contextPath}/uploads/${profile.photoUrl}
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    ${pageContext.request.contextPath}/resources/images/default-profile-full.jpg
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </c:set>
+                                        <img src="${authorBoxImageSource}"
                                              alt="Ảnh của ${profile.name}"
                                              onerror="this.src='${pageContext.request.contextPath}/resources/images/default-profile-author-placeholder.jpg'; this.onerror=null;">
                                     </div>
@@ -179,7 +213,24 @@
                         <c:if test="${not empty profile}">
                             <div class="sidebar-widget author-widget" data-aos="fade-left" data-aos-delay="100">
                                 <div class="author-widget-img">
-                                    <img src="${not empty profile.photoUrl ? (profile.photoUrl.startsWith('http') ? profile.photoUrl : pageContext.request.contextPath.concat(profile.photoUrl)) : pageContext.request.contextPath.concat('/resources/images/default-profile-sidebar.jpg')}"
+                                    <c:set var="sidebarProfileImageSource">
+                                        <c:choose>
+                                            <c:when test="${not empty profile.photoUrl}">
+                                                <c:choose>
+                                                    <c:when test="${fn:startsWith(profile.photoUrl, 'http')}">
+                                                        ${profile.photoUrl}
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        ${pageContext.request.contextPath}/uploads/${profile.photoUrl}
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </c:when>
+                                            <c:otherwise>
+                                                ${pageContext.request.contextPath}/resources/images/default-profile-sidebar.jpg
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </c:set>
+                                    <img src="${sidebarProfileImageSource}"
                                          alt="Ảnh của ${profile.name}"
                                          onerror="this.src='${pageContext.request.contextPath}/resources/images/default-profile-sidebar-placeholder.jpg'; this.onerror=null;">
                                 </div>
@@ -221,7 +272,24 @@
                                             <div class="recent-post-item">
                                                 <div class="recent-post-img">
                                                     <a href="${pageContext.request.contextPath}/blog/post?id=${recentPost.id}">
-                                                        <img src="${not empty recentPost.imageUrl ? (recentPost.imageUrl.startsWith('http') ? recentPost.imageUrl : pageContext.request.contextPath.concat(recentPost.imageUrl)) : pageContext.request.contextPath.concat('/resources/images/default-blog-thumb.jpg')}"
+                                                        <c:set var="recentPostSidebarImageSource">
+                                                            <c:choose>
+                                                                <c:when test="${not empty recentPost.imageUrl}">
+                                                                    <c:choose>
+                                                                        <c:when test="${fn:startsWith(recentPost.imageUrl, 'http')}">
+                                                                            ${recentPost.imageUrl}
+                                                                        </c:when>
+                                                                        <c:otherwise>
+                                                                            ${pageContext.request.contextPath}/uploads/${recentPost.imageUrl}
+                                                                        </c:otherwise>
+                                                                    </c:choose>
+                                                                </c:when>
+                                                                <c:otherwise>
+                                                                    ${pageContext.request.contextPath}/resources/images/default-blog-thumb.jpg
+                                                                </c:otherwise>
+                                                            </c:choose>
+                                                        </c:set>
+                                                        <img src="${recentPostSidebarImageSource}"
                                                              alt="<c:out value='${recentPost.title}'/>"
                                                              onerror="this.src='${pageContext.request.contextPath}/resources/images/default-blog-thumb-placeholder.jpg'; this.onerror=null;">
                                                     </a>

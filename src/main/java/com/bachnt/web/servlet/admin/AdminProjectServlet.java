@@ -4,7 +4,7 @@ import com.bachnt.dao.ProjectDAO;
 import com.bachnt.model.Project;
 import com.bachnt.dao.ProfileDAO;
 import com.bachnt.model.Profile;
-
+import com.bachnt.utils.FileUploadUtils;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -14,23 +14,20 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.Part;
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @WebServlet("/admin/projects")
 @MultipartConfig(
-        fileSizeThreshold = 1024 * 1024 * 1,  // 1 MB
-        maxFileSize = 1024 * 1024 * 10, // 10 MB
-        maxRequestSize = 1024 * 1024 * 15 // 15 MB
+        fileSizeThreshold = 1024 * 1024 * 1,
+        maxFileSize = 1024 * 1024 * 10,
+        maxRequestSize = 1024 * 1024 * 15
 )
 public class AdminProjectServlet extends HttpServlet {
     private static final Logger logger = LoggerFactory.getLogger(AdminProjectServlet.class);
@@ -38,9 +35,7 @@ public class AdminProjectServlet extends HttpServlet {
     private ProjectDAO projectDAO;
     private ProfileDAO profileDAO;
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
-    private static final String UPLOAD_DIR_PROJECT_PHYSICAL = "/Users/ngogiakhanh/Documents/PersonalWebsite/PersonalWebsiteUploads/projects";
-    private static final String URL_PATH_PROJECT_FOR_DB = "/my-uploaded-images/projects";
+    private static final String PROJECTS_SUBFOLDER = "projects";
 
     @Override
     public void init() throws ServletException {
@@ -86,8 +81,8 @@ public class AdminProjectServlet extends HttpServlet {
                     break;
             }
         } catch (Exception e) {
-            logger.error("Lỗi xử lý yêu cầu GET cho action: {}", action, e);
-            session.setAttribute("projectUpdateMessageError", "Lỗi hệ thống nghiêm trọng, vui lòng thử lại sau.");
+            logger.error("Error processing GET request for action: {}", action, e);
+            session.setAttribute("projectMessageError", "A system error occurred. Please try again later.");
             listProjects(request, response);
         }
     }
@@ -111,13 +106,13 @@ public class AdminProjectServlet extends HttpServlet {
                     deleteProjectAction(request, response, true);
                     break;
                 default:
-                    session.setAttribute("projectMessageError", "Hành động POST không hợp lệ.");
+                    session.setAttribute("projectMessageError", "Invalid POST action.");
                     response.sendRedirect(request.getContextPath() + "/admin/projects");
                     break;
             }
         } catch (Exception e) {
-            logger.error("Lỗi khi xử lý yêu cầu POST cho action: {}", action, e.getMessage(), e);
-            session.setAttribute("projectUpdateMessageError", "Lỗi hệ thống nghiêm trọng, vui lòng thử lại sau.");
+            logger.error("Error processing POST request for action: {}", action, e.getMessage(), e);
+            session.setAttribute("projectMessageError", "A critical system error occurred. Please try again later.");
             response.sendRedirect(request.getContextPath() + "/admin/projects");
         }
     }
@@ -144,11 +139,12 @@ public class AdminProjectServlet extends HttpServlet {
                 request.setAttribute("formAction", "edit");
                 request.getRequestDispatcher("/admin/project-form.jsp").forward(request, response);
             } else {
-                session.setAttribute("projectMessageError", "Không tìm thấy dự án để sửa (ID: " + id + ").");
+                session.setAttribute("projectMessageError", "Project not found for editing (ID: " + id + ").");
                 response.sendRedirect(request.getContextPath() + "/admin/projects");
             }
         } catch (NumberFormatException e) {
-            session.setAttribute("projectUpdateMessageError", "Lỗi hệ thống nghiêm trọng, vui lòng thử lại sau.");
+            logger.warn("Invalid project ID format for editing: {}", request.getParameter("id"));
+            session.setAttribute("projectMessageError", "Invalid project ID.");
             response.sendRedirect(request.getContextPath() + "/admin/projects");
         }
     }
@@ -162,13 +158,18 @@ public class AdminProjectServlet extends HttpServlet {
         String overallMessage = "";
 
         if (!isNew) {
-            project.setId(Integer.parseInt(idParam));
-            Project existingProject = projectDAO.getProjectById(project.getId());
-            if (existingProject != null) {
-                project.setImageUrl(existingProject.getImageUrl()); // Mặc định giữ ảnh cũ
-                project.setStartDate(existingProject.getStartDate()); // Giữ ngày tạo/bắt đầu cũ nếu không được cung cấp mới
-            } else {
-                isNew = true; 
+            try {
+                project.setId(Integer.parseInt(idParam));
+                Project existingProject = projectDAO.getProjectById(project.getId());
+                if (existingProject != null) {
+                    project.setImageUrl(existingProject.getImageUrl());
+                    project.setStartDate(existingProject.getStartDate());
+                } else {
+                    isNew = true;
+                }
+            } catch (NumberFormatException e) {
+                logger.warn("Invalid project ID format for saving existing project: {}", idParam);
+                isNew = true;
             }
         }
 
@@ -184,8 +185,8 @@ public class AdminProjectServlet extends HttpServlet {
             String startDateStr = request.getParameter("startDate");
             if (startDateStr != null && !startDateStr.isEmpty()) {
                 project.setStartDate(dateFormat.parse(startDateStr));
-            } else if (isNew) { // Nếu là mới và không có start date, có thể đặt ngày hiện tại hoặc báo lỗi
-                project.setStartDate(new Date()); // Hoặc xử lý khác
+            } else if (isNew) {
+                project.setStartDate(new Date());
             }
 
             String endDateStr = request.getParameter("endDate");
@@ -195,82 +196,64 @@ public class AdminProjectServlet extends HttpServlet {
                 project.setEndDate(null);
             }
         } catch (ParseException e) {
-            logger.error("Lỗi khi phân tích ngày tháng: {}", e.getMessage(), e);
-            session.setAttribute("projectUpdateMessageError", "Lỗi hệ thống nghiêm trọng, vui lòng thử lại sau.");
+            logger.error("Error parsing date: {}", e.getMessage(), e);
+            session.setAttribute("projectMessageError", "Date format error (yyyy-MM-dd).");
             response.sendRedirect(request.getContextPath() + (isNew ? "/admin/projects?action=add" : "/admin/projects?action=edit&id="+idParam) );
             return;
         }
 
-        Part filePart = request.getPart("imageFile"); 
-        String currentImageUrl = project.getImageUrl();
-        String newImageUrlFromUpload = null;
+        Part filePart = request.getPart("imageFile");
+        String currentRelativeImageUrl = project.getImageUrl();
+        String newRelativeImageUrlFromUpload = null;
         boolean imageActionTaken = false;
 
-        if (filePart != null && filePart.getSize() > 0) {
-            String originalFileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
-            if (originalFileName != null && !originalFileName.isEmpty()) {
-                String fileExtension = "";
-                int i = originalFileName.lastIndexOf('.');
-                if (i > 0) fileExtension = originalFileName.substring(i);
-                String uniqueFileName = UUID.randomUUID().toString() + fileExtension;
-
-                String physicalUploadPath = UPLOAD_DIR_PROJECT_PHYSICAL;
-                File uploadDir = new File(physicalUploadPath);
-                if (!uploadDir.exists()) {
-                    boolean dirCreated = uploadDir.mkdirs();
-                    if(!dirCreated){
-                        session.setAttribute("projectMessageError", "Lỗi nghiêm trọng: Không thể tạo thư mục upload cho projects.");
-                        response.sendRedirect(request.getContextPath() + "/admin/projects");
-                        return;
+        if (filePart != null && filePart.getSize() > 0 && filePart.getSubmittedFileName() != null && !filePart.getSubmittedFileName().isEmpty()) {
+            try {
+                newRelativeImageUrlFromUpload = FileUploadUtils.saveUploadedFile(filePart, PROJECTS_SUBFOLDER);
+                if (newRelativeImageUrlFromUpload != null) {
+                    overallMessage += "Project image uploaded. ";
+                    if (currentRelativeImageUrl != null && !currentRelativeImageUrl.isEmpty() && !currentRelativeImageUrl.contains("default")) {
+                        FileUploadUtils.deleteUploadedFile(currentRelativeImageUrl);
                     }
-                }
-
-                String physicalFilePath = physicalUploadPath + File.separator + uniqueFileName;
-                try {
-                    filePart.write(physicalFilePath);
-                    newImageUrlFromUpload = URL_PATH_PROJECT_FOR_DB + "/" + uniqueFileName;
+                    project.setImageUrl(newRelativeImageUrlFromUpload);
                     imageActionTaken = true;
-                    overallMessage += "Ảnh dự án đã được tải lên. ";
-
-                    if (currentImageUrl != null && !currentImageUrl.isEmpty() && !currentImageUrl.contains("default")) {
-                        String oldFileNameOnly = currentImageUrl.substring(currentImageUrl.lastIndexOf('/') + 1);
-                        File oldFilePhysical = new File(UPLOAD_DIR_PROJECT_PHYSICAL + File.separator + oldFileNameOnly);
-                        if (oldFilePhysical.exists()) oldFilePhysical.delete();
-                    }
-                } catch (IOException e) {
-                    logger.error("Lỗi khi ghi file ảnh dự án: {}", e.getMessage(), e);
-                    session.setAttribute("projectUpdateMessageError", "Lỗi hệ thống nghiêm trọng, vui lòng thử lại sau.");
+                } else {
+                    session.setAttribute("projectMessageError", (session.getAttribute("projectMessageError") != null ? session.getAttribute("projectMessageError") + " " : "") + "Failed to save uploaded project image.");
                 }
+            } catch (IOException e) {
+                logger.error("Error saving uploaded project image: {}", e.getMessage(), e);
+                session.setAttribute("projectMessageError", (session.getAttribute("projectMessageError") != null ? session.getAttribute("projectMessageError") + " " : "") + "Error uploading project image: " + e.getMessage());
             }
         }
 
         String deleteImageFlag = request.getParameter("deleteImage");
-        if ("true".equals(deleteImageFlag) && newImageUrlFromUpload == null) {
-            if (currentImageUrl != null && !currentImageUrl.isEmpty() && !currentImageUrl.contains("default")) {
-                String oldFileNameOnly = currentImageUrl.substring(currentImageUrl.lastIndexOf('/') + 1);
-                File oldFilePhysical = new File(UPLOAD_DIR_PROJECT_PHYSICAL + File.separator + oldFileNameOnly);
-                if (oldFilePhysical.exists()) oldFilePhysical.delete();
+        if ("true".equals(deleteImageFlag) && newRelativeImageUrlFromUpload == null) {
+            if (currentRelativeImageUrl != null && !currentRelativeImageUrl.isEmpty() && !currentRelativeImageUrl.contains("default")) {
+                FileUploadUtils.deleteUploadedFile(currentRelativeImageUrl);
             }
             project.setImageUrl(null);
             imageActionTaken = true;
-            overallMessage += "Ảnh dự án đã được xóa. ";
-        } else if (newImageUrlFromUpload != null) {
-            project.setImageUrl(newImageUrlFromUpload);
+            overallMessage += "Project image removed. ";
         }
+
+        if (!imageActionTaken && newRelativeImageUrlFromUpload == null) {
+            project.setImageUrl(currentRelativeImageUrl);
+        }
+
 
         boolean success;
         if (isNew) {
             success = projectDAO.addProject(project);
-            if (success) session.setAttribute("projectMessageSuccess", (overallMessage.isEmpty() ? "" : overallMessage) + "Dự án đã được thêm thành công!");
-            else session.setAttribute("projectMessageError", "Lỗi: Không thể thêm dự án.");
+            if (success) session.setAttribute("projectMessageSuccess", overallMessage.trim() + (overallMessage.isEmpty() && !imageActionTaken ? "" : " ") + "Project added successfully!");
+            else session.setAttribute("projectMessageError", (session.getAttribute("projectMessageError") != null ? session.getAttribute("projectMessageError") + " " : "") + "Error: Could not add project.");
         } else {
             success = projectDAO.updateProject(project);
-            if (success) session.setAttribute("projectMessageSuccess", (overallMessage.isEmpty() ? "" : overallMessage) + "Dự án đã được cập nhật thành công!");
-            else session.setAttribute("projectMessageError", "Lỗi: Không thể cập nhật dự án.");
+            if (success) session.setAttribute("projectMessageSuccess", overallMessage.trim() + (overallMessage.isEmpty() && !imageActionTaken ? "" : " ") + "Project updated successfully!");
+            else session.setAttribute("projectMessageError", (session.getAttribute("projectMessageError") != null ? session.getAttribute("projectMessageError") + " " : "") + "Error: Could not update project.");
         }
 
-        if (!success && !imageActionTaken && overallMessage.isEmpty()) {
-            session.setAttribute("projectUpdateMessageError", "Lỗi hệ thống nghiêm trọng, vui lòng thử lại sau.");
+        if (!success && overallMessage.isEmpty() && !imageActionTaken) {
+            session.setAttribute("projectMessageError", (session.getAttribute("projectMessageError") != null ? session.getAttribute("projectMessageError") + " " : "") + "Error: Could not save project information.");
         }
         response.sendRedirect(request.getContextPath() + "/admin/projects");
     }
@@ -281,24 +264,23 @@ public class AdminProjectServlet extends HttpServlet {
             int id = Integer.parseInt(request.getParameter("id"));
             Project projectToDelete = projectDAO.getProjectById(id);
             boolean success = projectDAO.deleteProject(id);
+
             if (success) {
-                session.setAttribute("projectMessageSuccess", "Dự án ID " + id + " đã được xóa thành công!");
+                session.setAttribute("projectMessageSuccess", "Project ID " + id + " deleted successfully!");
                 if (projectToDelete != null && projectToDelete.getImageUrl() != null && !projectToDelete.getImageUrl().isEmpty() && !projectToDelete.getImageUrl().contains("default")) {
-                    String imageFileName = projectToDelete.getImageUrl().substring(projectToDelete.getImageUrl().lastIndexOf('/') + 1);
-                    File imageFile = new File(UPLOAD_DIR_PROJECT_PHYSICAL + File.separator + imageFileName);
-                    if (imageFile.exists()) {
-                        imageFile.delete();
-                    }
+                    FileUploadUtils.deleteUploadedFile(projectToDelete.getImageUrl());
                 }
             } else {
-                session.setAttribute("projectMessageError", "Lỗi: Không thể xóa dự án ID " + id + ".");
+                session.setAttribute("projectMessageError", "Error: Could not delete project ID " + id + ".");
             }
         } catch (NumberFormatException e) {
-            session.setAttribute("projectMessageError", "ID dự án không hợp lệ để xóa.");
+            logger.warn("Invalid project ID format for deletion: {}", request.getParameter("id"));
+            session.setAttribute("projectMessageError", "Invalid project ID for deletion.");
         } catch (Exception e){
-            logger.error("Lỗi khi xóa dự án: {}", e.getMessage(), e);
-            session.setAttribute("projectUpdateMessageError", "Lỗi hệ thống nghiêm trọng, vui lòng thử lại sau.");
+            logger.error("Error deleting project: {}", e.getMessage(), e);
+            session.setAttribute("projectMessageError", "A system error occurred while deleting the project.");
         }
+
         if(redirectToList){
             response.sendRedirect(request.getContextPath() + "/admin/projects");
         } else {

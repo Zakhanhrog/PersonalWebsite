@@ -1,1 +1,0 @@
-web: bash -c 'catalina.sh run'

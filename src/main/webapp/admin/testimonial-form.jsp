@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <!DOCTYPE html>
 <html lang="vi">
@@ -18,7 +19,7 @@
 <jsp:include page="/admin/includes/admin-header.jsp" />
 
 <div class="container mt-4">
-    <h3>${formAction == 'add' ? 'Thêm Đánh Giá Mới' : 'Chỉnh Sửa Đánh Giá'} ID: ${testimonial.id}</h3>
+    <h3>${formAction == 'add' ? 'Thêm Đánh Giá Mới' : 'Chỉnh Sửa Đánh Giá'} <c:if test="${formAction == 'edit' && not empty testimonial.id}">ID: ${testimonial.id}</c:if></h3>
     <hr/>
     <c:if test="${not empty sessionScope.testimonialMessageError}">
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -55,8 +56,19 @@
         <div class="form-group">
             <label>Ảnh Khách Hàng/Logo hiện tại:</label><br>
             <c:if test="${not empty testimonial.clientImageUrl}">
-                <img src="${not empty testimonial.clientImageUrl ? (testimonial.clientImageUrl.startsWith('http') ? testimonial.clientImageUrl : pageContext.request.contextPath.concat(testimonial.clientImageUrl)) : pageContext.request.contextPath.concat('/resources/images/default-avatar.jpg')}"
-                     alt="Ảnh Client" class="current-image-preview">
+                <c:set var="currentTestimonialImageSource">
+                    <c:choose>
+                        <c:when test="${fn:startsWith(testimonial.clientImageUrl, 'http') || fn:startsWith(testimonial.clientImageUrl, 'https://ui-avatars.com')}">
+                            ${testimonial.clientImageUrl}
+                        </c:when>
+                        <c:otherwise>
+                            ${pageContext.request.contextPath}/uploads/${testimonial.clientImageUrl}
+                        </c:otherwise>
+                    </c:choose>
+                </c:set>
+                <img src="${currentTestimonialImageSource}"
+                     alt="Ảnh Client" class="current-image-preview"
+                     onerror="this.src='${pageContext.request.contextPath}/resources/images/default-avatar-placeholder.jpg'; this.onerror=null;">
                 <div class="form-check mb-2">
                     <input class="form-check-input" type="checkbox" name="deleteImage" value="true" id="deleteTestimonialImageCheck">
                     <label class="form-check-label" for="deleteTestimonialImageCheck">Xóa ảnh hiện tại</label>
@@ -75,13 +87,27 @@
     </form>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <%-- Sử dụng jquery-3.6.0 cho các script bên dưới --%>
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script>
-    window.setTimeout(function() {
-        $(".alert-danger, .alert-success").fadeTo(500, 0).slideUp(500, function(){ $(this).remove(); });
-    }, 7000);
+    $(document).ready(function() { // Đảm bảo DOM sẵn sàng
+        window.setTimeout(function() {
+            $(".alert-danger, .alert-success").fadeTo(500, 0).slideUp(500, function(){ $(this).remove(); });
+        }, 7000);
+
+        // UX improvements for testimonial image upload
+        $('#clientImageFile').on('change', function() {
+            if ($(this).val()) { // Nếu có file được chọn
+                $('#deleteTestimonialImageCheck').prop('checked', false);
+            }
+        });
+        $('#deleteTestimonialImageCheck').on('change', function() {
+            if ($(this).is(':checked')) {
+                $('#clientImageFile').val(''); // Xóa file đã chọn nếu có
+            }
+        });
+    });
 </script>
 </body>
 </html>

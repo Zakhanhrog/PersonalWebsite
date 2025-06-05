@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <!DOCTYPE html>
 <html lang="vi">
@@ -76,8 +77,19 @@
     <div class="form-group">
       <label>Ảnh đại diện hiện tại:</label><br>
       <c:if test="${not empty blogPost.imageUrl}">
-        <img src="${not empty blogPost.imageUrl ? (blogPost.imageUrl.startsWith('http') ? blogPost.imageUrl : pageContext.request.contextPath.concat(blogPost.imageUrl)) : pageContext.request.contextPath.concat('/resources/images/default-blog-thumb.jpg')}"
-             alt="<c:out value='${blogPost.title}'/>" class="current-image-preview">
+        <c:set var="currentBlogImageSource">
+          <c:choose>
+            <c:when test="${fn:startsWith(blogPost.imageUrl, 'http')}">
+              ${blogPost.imageUrl}
+            </c:when>
+            <c:otherwise>
+              ${pageContext.request.contextPath}/uploads/${blogPost.imageUrl}
+            </c:otherwise>
+          </c:choose>
+        </c:set>
+        <img src="${currentBlogImageSource}"
+             alt="<c:out value='${blogPost.title}'/>" class="current-image-preview"
+             onerror="this.src='${pageContext.request.contextPath}/resources/images/default-blog-thumb-placeholder.jpg'; this.onerror=null;">
         <div class="form-check mb-2">
           <input class="form-check-input" type="checkbox" name="deleteImage" value="true" id="deleteBlogImageCheck">
           <label class="form-check-label" for="deleteBlogImageCheck">
@@ -113,16 +125,29 @@
   <p class="mb-0">© ${java.time.Year.now().getValue()} Admin Panel</p>
 </footer>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <%-- THAY ĐỔI Ở ĐÂY --%>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script>
-  $(document).ready(function() { // Đảm bảo DOM sẵn sàng
+  $(document).ready(function() {
     window.setTimeout(function() {
       $(".alert-success, .alert-danger").fadeTo(500, 0).slideUp(500, function(){
         $(this).remove();
       });
     }, 7000);
+
+    // Thêm một chút JS để nếu người dùng chọn file mới thì bỏ chọn "Xóa ảnh hiện tại"
+    $('#imageFile').on('change', function() {
+      if ($(this).val()) { // Nếu có file được chọn
+        $('#deleteBlogImageCheck').prop('checked', false);
+      }
+    });
+    // Và ngược lại, nếu tick "Xóa ảnh hiện tại", thì xóa giá trị của file input
+    $('#deleteBlogImageCheck').on('change', function() {
+      if ($(this).is(':checked')) {
+        $('#imageFile').val(''); // Xóa file đã chọn nếu có
+      }
+    });
   });
 </script>
 </body>

@@ -21,7 +21,24 @@
             <div class="row">
                 <div class="col-lg-8">
                     <div class="project-main-image" data-aos="fade-up">
-                        <img src="${not empty project.imageUrl ? (project.imageUrl.startsWith('http') ? project.imageUrl : pageContext.request.contextPath.concat(project.imageUrl)) : pageContext.request.contextPath.concat('/resources/images/default-project-large.jpg')}"
+                        <c:set var="projectMainImageSource">
+                            <c:choose>
+                                <c:when test="${not empty project.imageUrl}">
+                                    <c:choose>
+                                        <c:when test="${fn:startsWith(project.imageUrl, 'http')}">
+                                            ${project.imageUrl}
+                                        </c:when>
+                                        <c:otherwise>
+                                            ${pageContext.request.contextPath}/uploads/${project.imageUrl}
+                                        </c:otherwise>
+                                    </c:choose>
+                                </c:when>
+                                <c:otherwise>
+                                    ${pageContext.request.contextPath}/resources/images/default-project-large.jpg
+                                </c:otherwise>
+                            </c:choose>
+                        </c:set>
+                        <img src="${projectMainImageSource}"
                              alt="<c:out value='${project.title}'/>"
                              onerror="this.src='${pageContext.request.contextPath}/resources/images/default-project-large-placeholder.jpg'; this.onerror=null;">
                     </div>
@@ -75,8 +92,24 @@
                                             <div class="related-project-item">
                                                 <div class="related-project-img">
                                                     <a href="${pageContext.request.contextPath}/projects/detail?id=${related.id}">
-                                                            <%-- SỬA Ở ĐÂY --%>
-                                                        <img src="${not empty related.imageUrl ? (related.imageUrl.startsWith('http') ? related.imageUrl : pageContext.request.contextPath.concat(related.imageUrl)) : pageContext.request.contextPath.concat('/resources/images/default-project-thumb.jpg')}"
+                                                        <c:set var="relatedProjectImageSource">
+                                                            <c:choose>
+                                                                <c:when test="${not empty related.imageUrl}">
+                                                                    <c:choose>
+                                                                        <c:when test="${fn:startsWith(related.imageUrl, 'http')}">
+                                                                            ${related.imageUrl}
+                                                                        </c:when>
+                                                                        <c:otherwise>
+                                                                            ${pageContext.request.contextPath}/uploads/${related.imageUrl}
+                                                                        </c:otherwise>
+                                                                    </c:choose>
+                                                                </c:when>
+                                                                <c:otherwise>
+                                                                    ${pageContext.request.contextPath}/resources/images/default-project-thumb.jpg
+                                                                </c:otherwise>
+                                                            </c:choose>
+                                                        </c:set>
+                                                        <img src="${relatedProjectImageSource}"
                                                              alt="<c:out value='${related.title}'/>"
                                                              onerror="this.src='${pageContext.request.contextPath}/resources/images/default-project-thumb-placeholder.jpg'; this.onerror=null;">
                                                     </a>

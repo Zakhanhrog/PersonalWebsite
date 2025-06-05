@@ -80,7 +80,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>ImageServlet</servlet-name>
-        <url-pattern>/my-uploaded-images/*</url-pattern>
+        <url-pattern>/uploads/*</url-pattern>
     </servlet-mapping>
 
     <error-page>

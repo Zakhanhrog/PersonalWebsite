@@ -21,9 +21,26 @@
             <div class="row align-items-center">
                 <div class="col-lg-5" data-aos="fade-right" data-aos-delay="100">
                     <div class="about-detail-img">
-                                <img src="${not empty profile.photoUrl ? (profile.photoUrl.startsWith('http') ? profile.photoUrl : pageContext.request.contextPath.concat(profile.photoUrl)) : pageContext.request.contextPath.concat('/resources/images/default-profile-full.jpg')}"
-                                     alt="Ảnh của ${profile.name}"
-                                     onerror="this.src='${pageContext.request.contextPath}/resources/images/default-profile-full-placeholder.jpg'; this.onerror=null;">
+                        <c:set var="profileImageSource">
+                            <c:choose>
+                                <c:when test="${not empty profile.photoUrl}">
+                                    <c:choose>
+                                        <c:when test="${fn:startsWith(profile.photoUrl, 'http')}">
+                                            ${profile.photoUrl}
+                                        </c:when>
+                                        <c:otherwise>
+                                            ${pageContext.request.contextPath}/uploads/${profile.photoUrl}
+                                        </c:otherwise>
+                                    </c:choose>
+                                </c:when>
+                                <c:otherwise>
+                                    ${pageContext.request.contextPath}/resources/images/default-profile-full.jpg
+                                </c:otherwise>
+                            </c:choose>
+                        </c:set>
+                        <img src="${profileImageSource}"
+                             alt="Ảnh của ${profile.name}"
+                             onerror="this.src='${pageContext.request.contextPath}/resources/images/default-profile-full-placeholder.jpg'; this.onerror=null;">
                     </div>
                 </div>
                 <div class="col-lg-7" data-aos="fade-left" data-aos-delay="200">
@@ -241,17 +258,26 @@
                     <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="${100 * loop.index}">
                         <div class="testimonial-item">
                             <div class="client-img">
-                                <c:choose>
-                                    <c:when test="${not empty testimonial.clientImageUrl}">
-                                        <img src="${testimonial.clientImageUrl.startsWith('http') ? testimonial.clientImageUrl : pageContext.request.contextPath.concat(testimonial.clientImageUrl)}"
-                                             alt="Ảnh của ${testimonial.clientName}"
-                                             onerror="this.src='https://ui-avatars.com/api/?name=${fn:escapeXml(fn:replace(testimonial.clientName, ' ', '+'))}&size=100&background=random&color=fff'; this.onerror=null;">
-                                    </c:when>
-                                    <c:otherwise>
-                                        <img src="https://ui-avatars.com/api/?name=${fn:escapeXml(fn:replace(testimonial.clientName, ' ', '+'))}&size=100&background=random"
-                                             alt="Ảnh của ${testimonial.clientName}">
-                                    </c:otherwise>
-                                </c:choose>
+                                <c:set var="testimonialImageSource">
+                                    <c:choose>
+                                        <c:when test="${not empty testimonial.clientImageUrl}">
+                                            <c:choose>
+                                                <c:when test="${fn:startsWith(testimonial.clientImageUrl, 'http') || fn:startsWith(testimonial.clientImageUrl, 'https://ui-avatars.com')}">
+                                                    ${testimonial.clientImageUrl}
+                                                </c:when>
+                                                <c:otherwise>
+                                                    ${pageContext.request.contextPath}/uploads/${testimonial.clientImageUrl}
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </c:when>
+                                        <c:otherwise>
+                                            https://ui-avatars.com/api/?name=${fn:escapeXml(fn:replace(testimonial.clientName, ' ', '+'))}&size=100&background=random
+                                        </c:otherwise>
+                                    </c:choose>
+                                </c:set>
+                                <img src="${testimonialImageSource}"
+                                     alt="Ảnh của ${testimonial.clientName}"
+                                     onerror="this.src='https://ui-avatars.com/api/?name=${fn:escapeXml(fn:replace(testimonial.clientName, ' ', '+'))}&size=100&background=random&color=fff'; this.onerror=null;">
                             </div>
                             <div class="testimonial-text">
                                 <i class="fas fa-quote-left"></i>

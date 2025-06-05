@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <!DOCTYPE html>
 <html lang="vi">
@@ -99,8 +100,19 @@
     <div class="form-group">
       <label>Ảnh đại diện hiện tại:</label><br>
       <c:if test="${not empty project.imageUrl}">
-        <img src="${not empty project.imageUrl ? (project.imageUrl.startsWith('http') ? project.imageUrl : pageContext.request.contextPath.concat(project.imageUrl)) : pageContext.request.contextPath.concat('/resources/images/default-project.jpg')}"
-             alt="Ảnh dự án" class="current-image-preview">
+        <c:set var="currentProjectImageSource">
+          <c:choose>
+            <c:when test="${fn:startsWith(project.imageUrl, 'http')}">
+              ${project.imageUrl}
+            </c:when>
+            <c:otherwise>
+              ${pageContext.request.contextPath}/uploads/${project.imageUrl}
+            </c:otherwise>
+          </c:choose>
+        </c:set>
+        <img src="${currentProjectImageSource}"
+             alt="Ảnh dự án" class="current-image-preview"
+             onerror="this.src='${pageContext.request.contextPath}/resources/images/default-project-placeholder.jpg'; this.onerror=null;">
         <div class="form-check mb-2">
           <input class="form-check-input" type="checkbox" name="deleteImage" value="true" id="deleteProjectImageCheck">
           <label class="form-check-label" for="deleteProjectImageCheck">
@@ -137,6 +149,18 @@
         $(this).remove();
       });
     }, 7000);
+
+    // UX improvements for project image upload
+    $('#imageFile').on('change', function() {
+      if ($(this).val()) {
+        $('#deleteProjectImageCheck').prop('checked', false);
+      }
+    });
+    $('#deleteProjectImageCheck').on('change', function() {
+      if ($(this).is(':checked')) {
+        $('#imageFile').val('');
+      }
+    });
   });
 </script>
 </body>

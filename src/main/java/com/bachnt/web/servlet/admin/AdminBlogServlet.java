@@ -4,6 +4,7 @@ import com.bachnt.dao.BlogPostDAO;
 import com.bachnt.model.BlogPost;
 import com.bachnt.model.Profile;
 import com.bachnt.dao.ProfileDAO;
+import com.bachnt.utils.FileUploadUtils;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -13,12 +14,12 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.Part;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,12 +31,11 @@ import org.slf4j.LoggerFactory;
         maxRequestSize = 1024 * 1024 * 15
 )
 public class AdminBlogServlet extends HttpServlet {
-    private static final Logger logger = LoggerFactory.getLogger(BlogPostDAO.class);
+    private static final Logger logger = LoggerFactory.getLogger(AdminBlogServlet.class);
     private static final long serialVersionUID = 1L;
     private BlogPostDAO blogPostDAO;
     private ProfileDAO profileDAO;
-    private static final String UPLOAD_DIR_BLOG_PHYSICAL = "/Users/ngogiakhanh/Documents/PersonalWebsite/PersonalWebsiteUploads/blog_posts";
-    private static final String URL_PATH_BLOG_FOR_DB = "/my-uploaded-images/blog_posts";
+    private static final String BLOG_SUBFOLDER = "blog_posts";
 
     @Override
     public void init() throws ServletException {
@@ -64,7 +64,6 @@ public class AdminBlogServlet extends HttpServlet {
         Profile profile = profileDAO.getDefaultProfile();
         request.setAttribute("profileAdmin", profile);
 
-
         try {
             switch (action) {
                 case "add":
@@ -82,8 +81,8 @@ public class AdminBlogServlet extends HttpServlet {
                     break;
             }
         } catch (Exception e) {
-            logger.error("Lỗi không mong muốn trong AdminBlogServlet action {}: {}", action, e.getMessage(), e);
-            session.setAttribute("blogUpdateError", "Lỗi hệ thống nghiêm trọng, vui lòng thử lại sau.");
+            logger.error("Error in AdminBlogServlet doGet action {}: {}", action, e.getMessage(), e);
+            session.setAttribute("blogMessageError", "A system error occurred. Please try again later.");
             listPosts(request, response);
         }
     }
@@ -107,13 +106,13 @@ public class AdminBlogServlet extends HttpServlet {
                     deletePost(request, response, true);
                     break;
                 default:
-                    session.setAttribute("blogMessageError", "Hành động POST không hợp lệ.");
+                    session.setAttribute("blogMessageError", "Invalid POST action.");
                     response.sendRedirect(request.getContextPath() + "/admin/blog");
                     break;
             }
         } catch (Exception e) {
-            logger.error("Lỗi không mong muốn trong AdminBlogServlet action {}: {}", action, e.getMessage(), e);
-            session.setAttribute("blogUpdateError", "Lỗi hệ thống nghiêm trọng, vui lòng thử lại sau.");
+            logger.error("Error in AdminBlogServlet doPost action {}: {}", action, e.getMessage(), e);
+            session.setAttribute("blogMessageError", "A critical system error occurred. Please try again later.");
             response.sendRedirect(request.getContextPath() + "/admin/blog");
         }
     }
@@ -143,11 +142,12 @@ public class AdminBlogServlet extends HttpServlet {
                 request.setAttribute("formAction", "edit");
                 request.getRequestDispatcher("/admin/blog-form.jsp").forward(request, response);
             } else {
-                session.setAttribute("blogMessageError", "Không tìm thấy bài viết để sửa (ID: " + id + ").");
+                session.setAttribute("blogMessageError", "Blog post not found for editing (ID: " + id + ").");
                 response.sendRedirect(request.getContextPath() + "/admin/blog");
             }
         } catch (NumberFormatException e) {
-            session.setAttribute("blogUpdateError", "Lỗi hệ thống nghiêm trọng, vui lòng thử lại sau.");
+            logger.warn("Invalid blog post ID format for editing: {}", request.getParameter("id"));
+            session.setAttribute("blogMessageError", "Invalid blog post ID.");
             response.sendRedirect(request.getContextPath() + "/admin/blog");
         }
     }
@@ -161,13 +161,19 @@ public class AdminBlogServlet extends HttpServlet {
         String overallMessage = "";
 
         if (!isNew) {
-            blogPost.setId(Integer.parseInt(idParam));
-            BlogPost existingPost = blogPostDAO.getBlogPostById(blogPost.getId());
-            if (existingPost != null) {
-                blogPost.setCreatedDate(existingPost.getCreatedDate());
-                blogPost.setImageUrl(existingPost.getImageUrl());
-            } else {
-                isNew = true;
+            try {
+                blogPost.setId(Integer.parseInt(idParam));
+                BlogPost existingPost = blogPostDAO.getBlogPostById(blogPost.getId());
+                if (existingPost != null) {
+                    blogPost.setCreatedDate(existingPost.getCreatedDate());
+                    blogPost.setImageUrl(existingPost.getImageUrl());
+                } else {
+                    isNew = true;
+                    blogPost.setCreatedDate(new Date());
+                }
+            } catch (NumberFormatException e) {
+                logger.warn("Invalid blog post ID format for saving existing post: {}", idParam);
+                isNew = true; // Treat as new if ID is invalid
                 blogPost.setCreatedDate(new Date());
             }
         } else {
@@ -184,75 +190,51 @@ public class AdminBlogServlet extends HttpServlet {
         blogPost.setStatus(request.getParameter("status"));
 
         Part filePart = request.getPart("imageFile");
-        String currentImageUrl = blogPost.getImageUrl();
-        String newImageUrlFromUpload = null;
-        boolean imageActionTaken = false;
+        String currentRelativeImageUrl = blogPost.getImageUrl();
+        String newRelativeImageUrlFromUpload = null;
 
-        if (filePart != null && filePart.getSize() > 0) {
-            String originalFileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
-            if (originalFileName != null && !originalFileName.isEmpty()) {
-                String fileExtension = "";
-                int i = originalFileName.lastIndexOf('.');
-                if (i > 0) fileExtension = originalFileName.substring(i);
-                String uniqueFileName = UUID.randomUUID().toString() + fileExtension;
-
-                String physicalUploadPath = UPLOAD_DIR_BLOG_PHYSICAL;
-                File uploadDir = new File(physicalUploadPath);
-                if (!uploadDir.exists()) {
-                    boolean dirCreated = uploadDir.mkdirs();
-                    if(!dirCreated){
-                        session.setAttribute("blogMessageError", "Lỗi nghiêm trọng: Không thể tạo thư mục upload cho blog.");
-                        response.sendRedirect(request.getContextPath() + "/admin/blog");
-                        return;
+        if (filePart != null && filePart.getSize() > 0 && filePart.getSubmittedFileName() != null && !filePart.getSubmittedFileName().isEmpty()) {
+            try {
+                newRelativeImageUrlFromUpload = FileUploadUtils.saveUploadedFile(filePart, BLOG_SUBFOLDER);
+                if (newRelativeImageUrlFromUpload != null) {
+                    overallMessage += "Blog post image uploaded. ";
+                    if (currentRelativeImageUrl != null && !currentRelativeImageUrl.isEmpty() && !currentRelativeImageUrl.contains("default")) {
+                        deletePhysicalFile(currentRelativeImageUrl);
                     }
+                } else {
+                    session.setAttribute("blogMessageError", "Failed to save uploaded file.");
                 }
-
-                String physicalFilePath = physicalUploadPath + File.separator + uniqueFileName;
-                try {
-                    filePart.write(physicalFilePath);
-                    newImageUrlFromUpload = URL_PATH_BLOG_FOR_DB + "/" + uniqueFileName;
-                    imageActionTaken = true;
-                    overallMessage += "Ảnh bài viết đã được tải lên. ";
-
-                    if (currentImageUrl != null && !currentImageUrl.isEmpty() && !currentImageUrl.contains("default")) {
-                        String oldFileNameOnly = currentImageUrl.substring(currentImageUrl.lastIndexOf('/') + 1);
-                        File oldFilePhysical = new File(UPLOAD_DIR_BLOG_PHYSICAL + File.separator + oldFileNameOnly);
-                        if (oldFilePhysical.exists()) oldFilePhysical.delete();
-                    }
-                } catch (IOException e) {
-                    logger.error("Lỗi không mong muốn trong AdminBlogServlet action {}: {}", e.getMessage(), e);
-                    session.setAttribute("blogUpdateError", "Lỗi hệ thống nghiêm trọng, vui lòng thử lại sau.");
-                }
+            } catch (IOException e) {
+                logger.error("Error saving uploaded file for blog post: {}", e.getMessage(), e);
+                session.setAttribute("blogMessageError", "Error uploading file: " + e.getMessage());
             }
         }
 
         String deleteImageFlag = request.getParameter("deleteImage");
-        if ("true".equals(deleteImageFlag) && newImageUrlFromUpload == null) {
-            if (currentImageUrl != null && !currentImageUrl.isEmpty() && !currentImageUrl.contains("default")) {
-                String oldFileNameOnly = currentImageUrl.substring(currentImageUrl.lastIndexOf('/') + 1);
-                File oldFilePhysical = new File(UPLOAD_DIR_BLOG_PHYSICAL + File.separator + oldFileNameOnly);
-                if (oldFilePhysical.exists()) oldFilePhysical.delete();
+        if ("true".equals(deleteImageFlag) && newRelativeImageUrlFromUpload == null) {
+            if (currentRelativeImageUrl != null && !currentRelativeImageUrl.isEmpty() && !currentRelativeImageUrl.contains("default")) {
+                deletePhysicalFile(currentRelativeImageUrl);
             }
             blogPost.setImageUrl(null);
-            imageActionTaken = true;
-            overallMessage += "Ảnh bài viết đã được xóa. ";
-        } else if (newImageUrlFromUpload != null) {
-            blogPost.setImageUrl(newImageUrlFromUpload);
+            overallMessage += "Blog post image removed. ";
+        } else if (newRelativeImageUrlFromUpload != null) {
+            blogPost.setImageUrl(newRelativeImageUrlFromUpload);
         }
+
 
         boolean success;
         if (isNew) {
             success = blogPostDAO.addBlogPost(blogPost);
-            if (success) session.setAttribute("blogMessageSuccess", (overallMessage.isEmpty() ? "" : overallMessage) + "Bài viết đã được thêm thành công!");
-            else  session.setAttribute("blogMessageError", "Lỗi: Không thể thêm bài viết.");
+            if (success) session.setAttribute("blogMessageSuccess", overallMessage + "Blog post added successfully!");
+            else  session.setAttribute("blogMessageError", "Error: Could not add blog post.");
         } else {
             success = blogPostDAO.updateBlogPost(blogPost);
-            if (success) session.setAttribute("blogMessageSuccess", (overallMessage.isEmpty() ? "" : overallMessage) + "Bài viết đã được cập nhật thành công!");
-            else session.setAttribute("blogMessageError", "Lỗi: Không thể cập nhật bài viết.");
+            if (success) session.setAttribute("blogMessageSuccess", overallMessage + "Blog post updated successfully!");
+            else session.setAttribute("blogMessageError", "Error: Could not update blog post.");
         }
 
-        if (!success && !imageActionTaken && overallMessage.isEmpty()) { // Trường hợp chỉ lỗi lưu text và không có action ảnh
-            session.setAttribute("blogMessageError", "Lỗi: Không thể lưu thông tin bài viết.");
+        if (!success && overallMessage.isEmpty()) {
+            session.setAttribute("blogMessageError", "Error: Could not save blog post information.");
         }
         response.sendRedirect(request.getContextPath() + "/admin/blog");
     }
@@ -263,28 +245,40 @@ public class AdminBlogServlet extends HttpServlet {
             int id = Integer.parseInt(request.getParameter("id"));
             BlogPost postToDelete = blogPostDAO.getBlogPostById(id);
             boolean success = blogPostDAO.deleteBlogPost(id);
+
             if (success) {
-                session.setAttribute("blogMessageSuccess", "Bài viết ID " + id + " đã được xóa thành công!");
+                session.setAttribute("blogMessageSuccess", "Blog post ID " + id + " deleted successfully!");
                 if (postToDelete != null && postToDelete.getImageUrl() != null && !postToDelete.getImageUrl().isEmpty() && !postToDelete.getImageUrl().contains("default")) {
-                    String imageFileName = postToDelete.getImageUrl().substring(postToDelete.getImageUrl().lastIndexOf('/') + 1);
-                    File imageFile = new File(UPLOAD_DIR_BLOG_PHYSICAL + File.separator + imageFileName);
-                    if (imageFile.exists()) {
-                        imageFile.delete();
-                    }
+                    deletePhysicalFile(postToDelete.getImageUrl());
                 }
             } else {
-                session.setAttribute("blogMessageError", "Lỗi: Không thể xóa bài viết ID " + id + ".");
+                session.setAttribute("blogMessageError", "Error: Could not delete blog post ID " + id + ".");
             }
         } catch (NumberFormatException e) {
-            session.setAttribute("blogMessageError", "ID bài viết không hợp lệ để xóa.");
+            logger.warn("Invalid blog post ID format for deletion: {}", request.getParameter("id"));
+            session.setAttribute("blogMessageError", "Invalid blog post ID for deletion.");
         } catch (Exception e){
-            logger.error("Lỗi không mong muốn trong AdminBlogServlet action {}: {}", e.getMessage(), e);
-            session.setAttribute("blogUpdateError", "Lỗi hệ thống nghiêm trọng, vui lòng thử lại sau.");
+            logger.error("Error deleting blog post: {}", e.getMessage(), e);
+            session.setAttribute("blogMessageError", "A system error occurred while deleting the post.");
         }
+
         if(redirectToList){
             response.sendRedirect(request.getContextPath() + "/admin/blog");
         } else {
             listPosts(request, response);
+        }
+    }
+
+    private void deletePhysicalFile(String relativeImagePath) {
+        if (relativeImagePath == null || relativeImagePath.isEmpty()) {
+            return;
+        }
+        try {
+            Path baseDir = Paths.get(FileUploadUtils.getBaseUploadDirectory());
+            Path filePath = baseDir.resolve(relativeImagePath);
+            Files.deleteIfExists(filePath);
+        } catch (IOException e) {
+            logger.error("Error deleting physical file {}: {}", relativeImagePath, e.getMessage(), e);
         }
     }
 }

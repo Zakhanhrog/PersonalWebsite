@@ -91,7 +91,17 @@
         <div class="form-group">
           <label>Ảnh đại diện hiện tại:</label><br>
           <c:if test="${not empty profile.photoUrl}">
-            <img src="${not empty profile.photoUrl ? (profile.photoUrl.startsWith('http') ? profile.photoUrl : pageContext.request.contextPath.concat(profile.photoUrl)) : pageContext.request.contextPath.concat('/resources/images/default-profile-full.jpg')}"
+            <c:set var="currentProfilePhotoSource">
+              <c:choose>
+                <c:when test="${fn:startsWith(profile.photoUrl, 'http')}">
+                  ${profile.photoUrl}
+                </c:when>
+                <c:otherwise>
+                  ${pageContext.request.contextPath}/uploads/${profile.photoUrl}
+                </c:otherwise>
+              </c:choose>
+            </c:set>
+            <img src="${currentProfilePhotoSource}"
                  alt="Ảnh của ${profile.name}"
                  class="current-photo-preview"
                  onerror="this.src='${pageContext.request.contextPath}/resources/images/default-profile-full-placeholder.jpg'; this.onerror=null;">
@@ -123,6 +133,7 @@
       <h5>Thêm Kỹ Năng Mới</h5>
       <form action="${pageContext.request.contextPath}/admin/profile" method="post" class="mb-4">
         <input type="hidden" name="action" value="addSkill">
+        <input type="hidden" name="org.apache.catalina.filters.CSRF_NONCE" value="${sessionScope['org.apache.catalina.filters.CSRF_NONCE']}">
         <div class="form-row align-items-end">
           <div class="form-group col-md-4">
             <label for="skillName">Tên kỹ năng *</label>
@@ -159,7 +170,7 @@
                       <input type="hidden" name="action" value="deleteSkill">
                       <input type="hidden" name="org.apache.catalina.filters.CSRF_NONCE" value="${sessionScope['org.apache.catalina.filters.CSRF_NONCE']}">
                       <input type="hidden" name="skillId" value="${skill.id}">
-                      <button type="submit" class="btn btn-danger" onclick="return confirm('Bạn có chắc muốn xóa kỹ năng này?');"><i class="fas fa-trash"></i></button>
+                      <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Bạn có chắc muốn xóa kỹ năng này?');"><i class="fas fa-trash"></i></button>
                     </form>
                   </td>
                 </tr>
@@ -212,7 +223,7 @@
                       <input type="hidden" name="action" value="deleteEducation">
                       <input type="hidden" name="org.apache.catalina.filters.CSRF_NONCE" value="${sessionScope['org.apache.catalina.filters.CSRF_NONCE']}">
                       <input type="hidden" name="eduId" value="${edu.id}">
-                      <button type="submit" class="btn btn-danger" onclick="return confirm('Xóa mục học vấn này?');"><i class="fas fa-trash"></i></button>
+                      <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Xóa mục học vấn này?');"><i class="fas fa-trash"></i></button>
                     </form>
                   </td>
                 </tr>
@@ -269,7 +280,7 @@
                       <input type="hidden" name="action" value="deleteExperience">
                       <input type="hidden" name="org.apache.catalina.filters.CSRF_NONCE" value="${sessionScope['org.apache.catalina.filters.CSRF_NONCE']}">
                       <input type="hidden" name="expId" value="${exp.id}">
-                      <button type="submit" class="btn btn-danger" onclick="return confirm('Xóa mục kinh nghiệm này?');"><i class="fas fa-trash"></i></button>
+                      <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Xóa mục kinh nghiệm này?');"><i class="fas fa-trash"></i></button>
                     </form>
                   </td>
                 </tr>
@@ -299,6 +310,18 @@
         $(this).remove();
       });
     }, 7000);
+
+    // UX improvements for photo upload
+    $('#photoFile').on('change', function() {
+      if ($(this).val()) {
+        $('#deletePhotoCheck').prop('checked', false);
+      }
+    });
+    $('#deletePhotoCheck').on('change', function() {
+      if ($(this).is(':checked')) {
+        $('#photoFile').val('');
+      }
+    });
   });
 </script>
 </body>

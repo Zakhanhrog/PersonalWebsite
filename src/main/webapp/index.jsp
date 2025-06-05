@@ -40,7 +40,24 @@
         <div class="row align-items-center">
             <div class="col-lg-5" data-aos="fade-right" data-aos-delay="100">
                 <div class="about-img">
-                    <img src="${not empty profile.photoUrl ? (profile.photoUrl.startsWith('http') ? profile.photoUrl : pageContext.request.contextPath.concat(profile.photoUrl)) : pageContext.request.contextPath.concat('/resources/images/default-profile-full.jpg')}"
+                    <c:set var="indexProfileImageSource">
+                        <c:choose>
+                            <c:when test="${not empty profile.photoUrl}">
+                                <c:choose>
+                                    <c:when test="${fn:startsWith(profile.photoUrl, 'http')}">
+                                        ${profile.photoUrl}
+                                    </c:when>
+                                    <c:otherwise>
+                                        ${pageContext.request.contextPath}/uploads/${profile.photoUrl}
+                                    </c:otherwise>
+                                </c:choose>
+                            </c:when>
+                            <c:otherwise>
+                                ${pageContext.request.contextPath}/resources/images/default-profile-full.jpg
+                            </c:otherwise>
+                        </c:choose>
+                    </c:set>
+                    <img src="${indexProfileImageSource}"
                          alt="Ảnh của ${profile.name}"
                          onerror="this.src='${pageContext.request.contextPath}/resources/images/default-profile-full-placeholder.jpg'; this.onerror=null;">
                 </div>
@@ -101,7 +118,24 @@
                     <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="${100 * loop.index}">
                         <div class="project-item-preview">
                             <div class="project-img">
-                                <img src="${not empty project.imageUrl ? project.imageUrl : pageContext.request.contextPath += '/resources/images/default-project.jpg'}"
+                                <c:set var="projectImageSource">
+                                    <c:choose>
+                                        <c:when test="${not empty project.imageUrl}">
+                                            <c:choose>
+                                                <c:when test="${fn:startsWith(project.imageUrl, 'http')}">
+                                                    ${project.imageUrl}
+                                                </c:when>
+                                                <c:otherwise>
+                                                    ${pageContext.request.contextPath}/uploads/${project.imageUrl}
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </c:when>
+                                        <c:otherwise>
+                                            ${pageContext.request.contextPath}/resources/images/default-project.jpg
+                                        </c:otherwise>
+                                    </c:choose>
+                                </c:set>
+                                <img src="${projectImageSource}"
                                      alt="<c:out value='${project.title}'/>"
                                      onerror="this.src='${pageContext.request.contextPath}/resources/images/default-project-placeholder.jpg'; this.onerror=null;">
                                 <div class="project-overlay">
@@ -136,7 +170,24 @@
                     <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="${100 * loop.index}">
                         <div class="blog-post-preview">
                             <div class="blog-img">
-                                <img src="${not empty post.imageUrl ? post.imageUrl : pageContext.request.contextPath += '/resources/images/default-blog.jpg'}"
+                                <c:set var="blogPreviewImageSource">
+                                    <c:choose>
+                                        <c:when test="${not empty post.imageUrl}">
+                                            <c:choose>
+                                                <c:when test="${fn:startsWith(post.imageUrl, 'http')}">
+                                                    ${post.imageUrl}
+                                                </c:when>
+                                                <c:otherwise>
+                                                    ${pageContext.request.contextPath}/uploads/${post.imageUrl}
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </c:when>
+                                        <c:otherwise>
+                                            ${pageContext.request.contextPath}/resources/images/default-blog.jpg
+                                        </c:otherwise>
+                                    </c:choose>
+                                </c:set>
+                                <img src="${blogPreviewImageSource}"
                                      alt="<c:out value='${post.title}'/>"
                                      onerror="this.src='${pageContext.request.contextPath}/resources/images/default-blog-placeholder.jpg'; this.onerror=null;">
                             </div>

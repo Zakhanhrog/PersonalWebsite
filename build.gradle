@@ -1,4 +1,3 @@
-
 plugins {
     id 'java'
     id 'war'
@@ -18,48 +17,23 @@ tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
 
-// Cấu hình để tải jetty-runner.jar
-configurations {
-    jettyRunnerLibs
-}
-
 dependencies {
     providedCompile 'javax.servlet:javax.servlet-api:4.0.1'
     providedCompile 'javax.servlet.jsp:javax.servlet.jsp-api:2.3.3'
     implementation 'javax.servlet:jstl:1.2'
-
     implementation 'mysql:mysql-connector-java:8.0.33'
     implementation 'org.postgresql:postgresql:42.7.3'
-
     implementation 'org.mindrot:jbcrypt:0.4'
-
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
-
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
     implementation 'org.slf4j:slf4j-api:1.7.36'
     implementation 'ch.qos.logback:logback-classic:1.2.13'
-
-    // Thêm jetty-runner
-    // Kiểm tra phiên bản jetty-runner mới nhất trên Maven Central (g:org.eclipse.jetty a:jetty-runner)
-    // Ví dụ: 9.4.54.v20240208 là một phiên bản gần đây (tháng 6 2024)
-    jettyRunnerLibs 'org.eclipse.jetty:jetty-runner:9.4.51.v20230217' }
+}
 
 test {
     useJUnitPlatform()
 }
 
-// Task để copy jetty-runner.jar vào thư mục build/jetty
-task copyJettyRunner(type: Copy) {
-    from configurations.jettyRunnerLibs
-    into "$buildDir/jetty" // Tạo thư mục riêng cho jetty-runner
-    rename { String fileName -> "jetty-runner.jar" }
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE // Thêm để tránh lỗi duplicate
-}
-
 war {
-    archiveFileName = 'PersonalWebsite-1.0-SNAPSHOT.war'
+    archiveFileName = 'ROOT.war'
 }
-
-// Task stage sẽ phụ thuộc vào việc build WAR và tải jetty-runner
-task stage(dependsOn: ['war', 'copyJettyRunner'])
-build.mustRunAfter clean // Đảm bảo clean chạy trước build nếu được gọi cùng

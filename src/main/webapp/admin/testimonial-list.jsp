@@ -16,7 +16,7 @@
         .table th, .table td { vertical-align: middle; font-size: 0.9rem;}
         .action-col { width: 120px; text-align: center;}
         .quote-preview { max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .client-img-thumb { max-width: 50px; max-height: 50px; border-radius: 3px; }
+        .client-img-thumb { max-width: 50px; max-height: 50px; border-radius: 3px; object-fit: cover;} /* Thêm object-fit */
     </style>
 </head>
 <body>
@@ -61,19 +61,27 @@
                                 <tr>
                                     <td>${item.id}</td>
                                     <td>
-                                        <c:choose>
-                                            <c:when test="${not empty item.clientImageUrl}">
-                                                <img src="${item.clientImageUrl.startsWith('http') ? item.clientImageUrl : pageContext.request.contextPath.concat(item.clientImageUrl)}" 
-                                                     alt="<c:out value='${item.clientName}'/>" 
-                                                     class="client-img-thumb"
-                                                     onerror="this.src='https://ui-avatars.com/api/?name=${fn:escapeXml(fn:replace(item.clientName, ' ', '+'))}&size=50&background=random&color=fff'; this.onerror=null;"/>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <img src="https://ui-avatars.com/api/?name=${fn:escapeXml(fn:replace(item.clientName, ' ', '+'))}&size=50&background=random" 
-                                                     alt="<c:out value='${item.clientName}'/>"
-                                                     class="client-img-thumb"/>
-                                            </c:otherwise>
-                                        </c:choose>
+                                        <c:set var="testimonialListImageSource">
+                                            <c:choose>
+                                                <c:when test="${not empty item.clientImageUrl}">
+                                                    <c:choose>
+                                                        <c:when test="${fn:startsWith(item.clientImageUrl, 'http') || fn:startsWith(item.clientImageUrl, 'https://ui-avatars.com')}">
+                                                            ${item.clientImageUrl}
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            ${pageContext.request.contextPath}/uploads/${item.clientImageUrl}
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    https://ui-avatars.com/api/?name=${fn:escapeXml(fn:replace(item.clientName, ' ', '+'))}&size=50&background=random
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </c:set>
+                                        <img src="${testimonialListImageSource}"
+                                             alt="<c:out value='${item.clientName}'/>"
+                                             class="client-img-thumb"
+                                             onerror="this.src='https://ui-avatars.com/api/?name=${fn:escapeXml(fn:replace(item.clientName, ' ', '+'))}&size=50&background=random&color=fff'; this.onerror=null;"/>
                                     </td>
                                     <td><c:out value="${item.clientName}"/></td>
                                     <td><c:out value="${item.clientPositionCompany}"/></td>

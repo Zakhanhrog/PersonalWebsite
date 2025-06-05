@@ -2,8 +2,9 @@ package com.bachnt.web.servlet.admin;
 
 import com.bachnt.dao.TestimonialDAO;
 import com.bachnt.model.Testimonial;
-import com.bachnt.dao.ProfileDAO; // For admin header consistency
+import com.bachnt.dao.ProfileDAO;
 import com.bachnt.model.Profile;
+import com.bachnt.utils.FileUploadUtils;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -13,11 +14,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.Part;
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.List;
-import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,9 +31,7 @@ public class AdminTestimonialServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private TestimonialDAO testimonialDAO;
     private ProfileDAO profileDAO;
-
-    private static final String UPLOAD_DIR_TESTIMONIAL_PHYSICAL = "/Users/ngogiakhanh/Documents/PersonalWebsite/PersonalWebsiteUploads/testimonials";
-    private static final String URL_PATH_TESTIMONIAL_FOR_DB = "/my-uploaded-images/testimonials";
+    private static final String TESTIMONIALS_SUBFOLDER = "testimonials";
 
     @Override
     public void init() throws ServletException {
@@ -59,7 +55,7 @@ public class AdminTestimonialServlet extends HttpServlet {
             session.removeAttribute("testimonialMessageError");
         }
 
-        Profile profile = profileDAO.getDefaultProfile(); // For admin header
+        Profile profile = profileDAO.getDefaultProfile();
         request.setAttribute("profileAdmin", profile);
 
         try {
@@ -79,8 +75,8 @@ public class AdminTestimonialServlet extends HttpServlet {
                     break;
             }
         } catch (Exception e) {
-            logger.error("AdminTestimonialServlet xử lý yêu cầu lỗi", action, e.getMessage(), e);
-            session.setAttribute("profileUpdateError", "Lỗi hệ thống nghiêm trọng, vui lòng thử lại sau.");
+            logger.error("Error processing GET request for action {}: {}", action, e.getMessage(), e);
+            session.setAttribute("testimonialMessageError", "A system error occurred. Please try again later.");
             listTestimonials(request, response);
         }
     }
@@ -104,13 +100,13 @@ public class AdminTestimonialServlet extends HttpServlet {
                     deleteTestimonialAction(request, response, true);
                     break;
                 default:
-                    session.setAttribute("testimonialMessageError", "Hành động không hợp lệ.");
+                    session.setAttribute("testimonialMessageError", "Invalid POST action.");
                     response.sendRedirect(request.getContextPath() + "/admin/testimonials");
                     break;
             }
         } catch (Exception e) {
-            logger.error("AdminTestimonialServlet xử lý yêu cầu POST lỗi", action, e.getMessage(), e);
-            session.setAttribute("profileUpdateError", "Lỗi hệ thống nghiêm trọng, vui lòng thử lại sau.");
+            logger.error("Error processing POST request for action {}: {}", action, e.getMessage(), e);
+            session.setAttribute("testimonialMessageError", "A critical system error occurred. Please try again later.");
             response.sendRedirect(request.getContextPath() + "/admin/testimonials");
         }
     }
@@ -137,11 +133,12 @@ public class AdminTestimonialServlet extends HttpServlet {
                 request.setAttribute("formAction", "edit");
                 request.getRequestDispatcher("/admin/testimonial-form.jsp").forward(request, response);
             } else {
-                session.setAttribute("testimonialMessageError", "Không tìm thấy đánh giá để sửa.");
+                session.setAttribute("testimonialMessageError", "Testimonial not found for editing (ID: " + id + ").");
                 response.sendRedirect(request.getContextPath() + "/admin/testimonials");
             }
         } catch (NumberFormatException e) {
-            session.setAttribute("profileUpdateError", "Lỗi hệ thống nghiêm trọng, vui lòng thử lại sau.");
+            logger.warn("Invalid testimonial ID format for editing: {}", request.getParameter("id"));
+            session.setAttribute("testimonialMessageError", "Invalid testimonial ID.");
             response.sendRedirect(request.getContextPath() + "/admin/testimonials");
         }
     }
@@ -154,9 +151,18 @@ public class AdminTestimonialServlet extends HttpServlet {
         String overallMessage = "";
 
         if (!isNew) {
-            testimonial.setId(Integer.parseInt(idParam));
-            Testimonial existing = testimonialDAO.getTestimonialById(testimonial.getId());
-            if(existing != null) testimonial.setClientImageUrl(existing.getClientImageUrl()); // Giữ ảnh cũ
+            try {
+                testimonial.setId(Integer.parseInt(idParam));
+                Testimonial existing = testimonialDAO.getTestimonialById(testimonial.getId());
+                if(existing != null) {
+                    testimonial.setClientImageUrl(existing.getClientImageUrl());
+                } else {
+                    isNew = true; // Not found, treat as new
+                }
+            } catch (NumberFormatException e) {
+                logger.warn("Invalid testimonial ID format for saving existing: {}", idParam);
+                isNew = true;
+            }
         }
 
         testimonial.setClientName(request.getParameter("clientName"));
@@ -165,71 +171,64 @@ public class AdminTestimonialServlet extends HttpServlet {
         try {
             testimonial.setDisplayOrder(Integer.parseInt(request.getParameter("displayOrder")));
         } catch (NumberFormatException e) {
-            testimonial.setDisplayOrder(0); // Mặc định
+            testimonial.setDisplayOrder(0);
+            logger.warn("Invalid display order format, defaulting to 0 for testimonial: {}", testimonial.getClientName());
         }
 
 
         Part filePart = request.getPart("clientImageFile");
-        String currentImageUrl = testimonial.getClientImageUrl();
-        String newImageUrlFromUpload = null;
+        String currentRelativeImageUrl = testimonial.getClientImageUrl();
+        String newRelativeImageUrlFromUpload = null;
         boolean imageActionTaken = false;
 
-        if (filePart != null && filePart.getSize() > 0) {
-            String originalFileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
-            if (originalFileName != null && !originalFileName.isEmpty()) {
-                String fileExtension = "";
-                int i = originalFileName.lastIndexOf('.');
-                if (i > 0) fileExtension = originalFileName.substring(i);
-                String uniqueFileName = UUID.randomUUID().toString() + fileExtension;
-
-                String physicalUploadPath = UPLOAD_DIR_TESTIMONIAL_PHYSICAL;
-                File uploadDir = new File(physicalUploadPath);
-                if (!uploadDir.exists()) uploadDir.mkdirs();
-
-                String physicalFilePath = physicalUploadPath + File.separator + uniqueFileName;
-                try {
-                    filePart.write(physicalFilePath);
-                    newImageUrlFromUpload = URL_PATH_TESTIMONIAL_FOR_DB + "/" + uniqueFileName;
-                    imageActionTaken = true;
-                    overallMessage += "Ảnh client đã được tải lên. ";
-
-                    if (currentImageUrl != null && !currentImageUrl.isEmpty() && !currentImageUrl.contains("default") && !currentImageUrl.startsWith("https://ui-avatars.com")) {
-                        String oldFileNameOnly = currentImageUrl.substring(currentImageUrl.lastIndexOf('/') + 1);
-                        File oldFilePhysical = new File(UPLOAD_DIR_TESTIMONIAL_PHYSICAL + File.separator + oldFileNameOnly);
-                        if (oldFilePhysical.exists()) oldFilePhysical.delete();
+        if (filePart != null && filePart.getSize() > 0 && filePart.getSubmittedFileName() != null && !filePart.getSubmittedFileName().isEmpty()) {
+            try {
+                newRelativeImageUrlFromUpload = FileUploadUtils.saveUploadedFile(filePart, TESTIMONIALS_SUBFOLDER);
+                if (newRelativeImageUrlFromUpload != null) {
+                    overallMessage += "Client image uploaded. ";
+                    if (currentRelativeImageUrl != null && !currentRelativeImageUrl.isEmpty() &&
+                            !currentRelativeImageUrl.contains("default") && !currentRelativeImageUrl.startsWith("https://ui-avatars.com")) {
+                        FileUploadUtils.deleteUploadedFile(currentRelativeImageUrl);
                     }
-                } catch (IOException e) {
-                    logger.error("Lỗi khi ghi file ảnh client: {}", e.getMessage(), e);
-                    session.setAttribute("profileUpdateError", "Lỗi hệ thống nghiêm trọng, vui lòng thử lại sau.");
+                    testimonial.setClientImageUrl(newRelativeImageUrlFromUpload);
+                    imageActionTaken = true;
+                } else {
+                    session.setAttribute("testimonialMessageError", (session.getAttribute("testimonialMessageError") != null ? session.getAttribute("testimonialMessageError") + " " : "") + "Failed to save uploaded client image.");
                 }
+            } catch (IOException e) {
+                logger.error("Error saving uploaded client image: {}", e.getMessage(), e);
+                session.setAttribute("testimonialMessageError", (session.getAttribute("testimonialMessageError") != null ? session.getAttribute("testimonialMessageError") + " " : "") + "Error uploading client image: " + e.getMessage());
             }
         }
 
         String deleteImageFlag = request.getParameter("deleteImage");
-        if ("true".equals(deleteImageFlag) && newImageUrlFromUpload == null) {
-            if (currentImageUrl != null && !currentImageUrl.isEmpty() && !currentImageUrl.contains("default") && !currentImageUrl.startsWith("https://ui-avatars.com")) {
-                String oldFileNameOnly = currentImageUrl.substring(currentImageUrl.lastIndexOf('/') + 1);
-                File oldFilePhysical = new File(UPLOAD_DIR_TESTIMONIAL_PHYSICAL + File.separator + oldFileNameOnly);
-                if (oldFilePhysical.exists()) oldFilePhysical.delete();
+        if ("true".equals(deleteImageFlag) && newRelativeImageUrlFromUpload == null) {
+            if (currentRelativeImageUrl != null && !currentRelativeImageUrl.isEmpty() &&
+                    !currentRelativeImageUrl.contains("default") && !currentRelativeImageUrl.startsWith("https://ui-avatars.com")) {
+                FileUploadUtils.deleteUploadedFile(currentRelativeImageUrl);
             }
             testimonial.setClientImageUrl(null);
             imageActionTaken = true;
-            overallMessage += "Ảnh client đã được xóa. ";
-        } else if (newImageUrlFromUpload != null) {
-            testimonial.setClientImageUrl(newImageUrlFromUpload);
+            overallMessage += "Client image removed. ";
+        }
+
+        if (!imageActionTaken && newRelativeImageUrlFromUpload == null) {
+            testimonial.setClientImageUrl(currentRelativeImageUrl);
         }
 
         boolean success;
         if (isNew) {
             success = testimonialDAO.addTestimonial(testimonial);
-            if (success) session.setAttribute("testimonialMessageSuccess", (overallMessage.isEmpty()?"":overallMessage) + "Đánh giá đã được thêm thành công!");
+            if (success) session.setAttribute("testimonialMessageSuccess", overallMessage.trim() + (overallMessage.isEmpty() && !imageActionTaken ? "" : " ") + "Testimonial added successfully!");
+            else session.setAttribute("testimonialMessageError", (session.getAttribute("testimonialMessageError") != null ? session.getAttribute("testimonialMessageError") + " " : "") + "Error: Could not add testimonial.");
         } else {
             success = testimonialDAO.updateTestimonial(testimonial);
-            if (success) session.setAttribute("testimonialMessageSuccess", (overallMessage.isEmpty()?"":overallMessage) + "Đánh giá đã được cập nhật thành công!");
+            if (success) session.setAttribute("testimonialMessageSuccess", overallMessage.trim() + (overallMessage.isEmpty() && !imageActionTaken ? "" : " ") + "Testimonial updated successfully!");
+            else session.setAttribute("testimonialMessageError", (session.getAttribute("testimonialMessageError") != null ? session.getAttribute("testimonialMessageError") + " " : "") + "Error: Could not update testimonial.");
         }
 
-        if (!success && !imageActionTaken && overallMessage.isEmpty()) {
-            session.setAttribute("testimonialMessageError", "Lỗi: Không thể lưu đánh giá.");
+        if (!success && overallMessage.isEmpty() && !imageActionTaken) {
+            session.setAttribute("testimonialMessageError", (session.getAttribute("testimonialMessageError") != null ? session.getAttribute("testimonialMessageError") + " " : "") + "Error: Could not save testimonial information.");
         }
         response.sendRedirect(request.getContextPath() + "/admin/testimonials");
     }
@@ -240,28 +239,26 @@ public class AdminTestimonialServlet extends HttpServlet {
             int id = Integer.parseInt(request.getParameter("id"));
             Testimonial testimonialToDelete = testimonialDAO.getTestimonialById(id);
             boolean success = testimonialDAO.deleteTestimonial(id);
+
             if (success) {
-                session.setAttribute("testimonialMessageSuccess", "Đánh giá ID " + id + " đã được xóa thành công!");
+                session.setAttribute("testimonialMessageSuccess", "Testimonial ID " + id + " deleted successfully!");
                 if (testimonialToDelete != null && testimonialToDelete.getClientImageUrl() != null &&
                         !testimonialToDelete.getClientImageUrl().isEmpty() &&
                         !testimonialToDelete.getClientImageUrl().contains("default") &&
                         !testimonialToDelete.getClientImageUrl().startsWith("https://ui-avatars.com")) {
-
-                    String imageFileName = testimonialToDelete.getClientImageUrl().substring(testimonialToDelete.getClientImageUrl().lastIndexOf('/') + 1);
-                    File imageFile = new File(UPLOAD_DIR_TESTIMONIAL_PHYSICAL + File.separator + imageFileName);
-                    if (imageFile.exists()) {
-                        imageFile.delete();
-                    }
+                    FileUploadUtils.deleteUploadedFile(testimonialToDelete.getClientImageUrl());
                 }
             } else {
-                session.setAttribute("testimonialMessageError", "Lỗi: Không thể xóa đánh giá ID " + id + ".");
+                session.setAttribute("testimonialMessageError", "Error: Could not delete testimonial ID " + id + ".");
             }
         } catch (NumberFormatException e) {
-            session.setAttribute("testimonialMessageError", "ID đánh giá không hợp lệ để xóa.");
+            logger.warn("Invalid testimonial ID format for deletion: {}", request.getParameter("id"));
+            session.setAttribute("testimonialMessageError", "Invalid testimonial ID for deletion.");
         } catch (Exception e) {
-            logger.error("Lỗi khi xóa đánh giá: {}", e.getMessage(), e);
-            session.setAttribute("profileUpdateError", "Lỗi hệ thống nghiêm trọng, vui lòng thử lại sau.");
+            logger.error("Error deleting testimonial: {}", e.getMessage(), e);
+            session.setAttribute("testimonialMessageError", "A system error occurred while deleting the testimonial.");
         }
+
         if(redirectToList){
             response.sendRedirect(request.getContextPath() + "/admin/testimonials");
         } else {

@@ -35,8 +35,24 @@
                         <div class="col-lg-4 col-md-6 mb-4 project-card-wrapper" data-aos="fade-up" data-aos-delay="${100 * (loop.index % 3)}">
                             <div class="project-item">
                                 <div class="project-img">
-                                        <%-- SỬA Ở ĐÂY --%>
-                                    <img src="${not empty project.imageUrl ? (project.imageUrl.startsWith('http') ? project.imageUrl : pageContext.request.contextPath.concat(project.imageUrl)) : pageContext.request.contextPath.concat('/resources/images/default-project.jpg')}"
+                                    <c:set var="projectListItemImageSource">
+                                        <c:choose>
+                                            <c:when test="${not empty project.imageUrl}">
+                                                <c:choose>
+                                                    <c:when test="${fn:startsWith(project.imageUrl, 'http')}">
+                                                        ${project.imageUrl}
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        ${pageContext.request.contextPath}/uploads/${project.imageUrl}
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </c:when>
+                                            <c:otherwise>
+                                                ${pageContext.request.contextPath}/resources/images/default-project.jpg
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </c:set>
+                                    <img src="${projectListItemImageSource}"
                                          alt="<c:out value='${project.title}'/>"
                                          onerror="this.src='${pageContext.request.contextPath}/resources/images/default-project-placeholder.jpg'; this.onerror=null;">
                                     <div class="project-overlay">
