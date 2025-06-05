@@ -19,13 +19,17 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @WebServlet("/admin/testimonials")
 @MultipartConfig(
-        fileSizeThreshold = 1024 * 1024 * 1,  // 1 MB
-        maxFileSize = 1024 * 1024 * 5,  // 5 MB
-        maxRequestSize = 1024 * 1024 * 10 // 10 MB
+        fileSizeThreshold = 1024 * 1024 * 1,
+        maxFileSize = 1024 * 1024 * 5,
+        maxRequestSize = 1024 * 1024 * 10
 )
 public class AdminTestimonialServlet extends HttpServlet {
+    private static final Logger logger = LoggerFactory.getLogger(AdminTestimonialServlet.class);
     private static final long serialVersionUID = 1L;
     private TestimonialDAO testimonialDAO;
     private ProfileDAO profileDAO;
@@ -75,8 +79,8 @@ public class AdminTestimonialServlet extends HttpServlet {
                     break;
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            request.setAttribute("messageError", "Lỗi xử lý yêu cầu: " + e.getMessage());
+            logger.error("AdminTestimonialServlet xử lý yêu cầu lỗi", action, e.getMessage(), e);
+            session.setAttribute("profileUpdateError", "Lỗi hệ thống nghiêm trọng, vui lòng thử lại sau.");
             listTestimonials(request, response);
         }
     }
@@ -105,8 +109,8 @@ public class AdminTestimonialServlet extends HttpServlet {
                     break;
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            session.setAttribute("testimonialMessageError", "Lỗi hệ thống: " + e.getMessage());
+            logger.error("AdminTestimonialServlet xử lý yêu cầu POST lỗi", action, e.getMessage(), e);
+            session.setAttribute("profileUpdateError", "Lỗi hệ thống nghiêm trọng, vui lòng thử lại sau.");
             response.sendRedirect(request.getContextPath() + "/admin/testimonials");
         }
     }
@@ -137,7 +141,7 @@ public class AdminTestimonialServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/admin/testimonials");
             }
         } catch (NumberFormatException e) {
-            session.setAttribute("testimonialMessageError", "ID đánh giá không hợp lệ.");
+            session.setAttribute("profileUpdateError", "Lỗi hệ thống nghiêm trọng, vui lòng thử lại sau.");
             response.sendRedirect(request.getContextPath() + "/admin/testimonials");
         }
     }
@@ -195,8 +199,8 @@ public class AdminTestimonialServlet extends HttpServlet {
                         if (oldFilePhysical.exists()) oldFilePhysical.delete();
                     }
                 } catch (IOException e) {
-                    e.printStackTrace();
-                    session.setAttribute("testimonialMessageError", "Lỗi khi ghi file ảnh client: " + e.getMessage());
+                    logger.error("Lỗi khi ghi file ảnh client: {}", e.getMessage(), e);
+                    session.setAttribute("profileUpdateError", "Lỗi hệ thống nghiêm trọng, vui lòng thử lại sau.");
                 }
             }
         }
@@ -208,13 +212,12 @@ public class AdminTestimonialServlet extends HttpServlet {
                 File oldFilePhysical = new File(UPLOAD_DIR_TESTIMONIAL_PHYSICAL + File.separator + oldFileNameOnly);
                 if (oldFilePhysical.exists()) oldFilePhysical.delete();
             }
-            testimonial.setClientImageUrl(null); // Xóa đường dẫn trong DB
+            testimonial.setClientImageUrl(null);
             imageActionTaken = true;
             overallMessage += "Ảnh client đã được xóa. ";
         } else if (newImageUrlFromUpload != null) {
             testimonial.setClientImageUrl(newImageUrlFromUpload);
         }
-        // Nếu không có hành động gì với ảnh, clientImageUrl đã được set từ existing hoặc là null (cho mới)
 
         boolean success;
         if (isNew) {
@@ -256,8 +259,8 @@ public class AdminTestimonialServlet extends HttpServlet {
         } catch (NumberFormatException e) {
             session.setAttribute("testimonialMessageError", "ID đánh giá không hợp lệ để xóa.");
         } catch (Exception e) {
-            e.printStackTrace();
-            session.setAttribute("testimonialMessageError", "Lỗi hệ thống khi xóa đánh giá.");
+            logger.error("Lỗi khi xóa đánh giá: {}", e.getMessage(), e);
+            session.setAttribute("profileUpdateError", "Lỗi hệ thống nghiêm trọng, vui lòng thử lại sau.");
         }
         if(redirectToList){
             response.sendRedirect(request.getContextPath() + "/admin/testimonials");

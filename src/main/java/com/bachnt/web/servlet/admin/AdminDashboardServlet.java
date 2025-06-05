@@ -18,17 +18,17 @@ import com.bachnt.model.Profile;
 public class AdminDashboardServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private ProfileDAO profileDAO;
-    private BlogPostDAO blogPostDAO;     // KHAI BÁO
-    private ProjectDAO projectDAO;       // KHAI BÁO
-    private ContactMessageDAO contactMessageDAO; // KHAI BÁO (đã có từ trước cho notif)
+    private BlogPostDAO blogPostDAO;
+    private ProjectDAO projectDAO;
+    private ContactMessageDAO contactMessageDAO;
 
 
     @Override
     public void init() throws ServletException {
         profileDAO = new ProfileDAO();
-        blogPostDAO = new BlogPostDAO();     // KHỞI TẠO
-        projectDAO = new ProjectDAO();       // KHỞI TẠO
-        contactMessageDAO = new ContactMessageDAO(); // KHỞI TẠO (đã có từ trước cho notif)
+        blogPostDAO = new BlogPostDAO();
+        projectDAO = new ProjectDAO();
+        contactMessageDAO = new ContactMessageDAO();
     }
 
     @Override
@@ -37,19 +37,13 @@ public class AdminDashboardServlet extends HttpServlet {
         Profile profile = profileDAO.getDefaultProfile();
         request.setAttribute("profileAdmin", profile);
 
-        // Lấy các số liệu thống kê
         int totalBlogPosts = blogPostDAO.getTotalBlogPostCountAdmin();
         int totalProjects = projectDAO.getTotalProjectCount();
         int newMessagesCount = contactMessageDAO.getUnreadMessageCount();
 
         request.setAttribute("totalBlogPosts", totalBlogPosts);
         request.setAttribute("totalProjects", totalProjects);
-        request.setAttribute("newMessagesCount", newMessagesCount); // Truyền số tin nhắn mới
-
-        // Lấy số liệu cho header (nếu AdminAuthFilter chưa làm hoặc bạn muốn làm ở đây)
-        // int unreadMessagesForHeader = contactMessageDAO.getUnreadMessageCount();
-        // request.setAttribute("unreadAdminMessageCount", unreadMessagesForHeader);
-
+        request.setAttribute("newMessagesCount", newMessagesCount);
         request.getRequestDispatcher("/admin/index.jsp").forward(request, response);
     }
 }

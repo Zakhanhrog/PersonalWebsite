@@ -8,7 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 import com.bachnt.model.BlogPost;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class BlogPostDAO {
+    private static final Logger logger = LoggerFactory.getLogger(BlogPostDAO.class);
 
     public BlogPost getBlogPostById(int id) {
         BlogPost blogPost = null;
@@ -24,7 +28,7 @@ public class BlogPostDAO {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("Lỗi SQL khi thực hiện: {}", e.getMessage(), e);
         }
         return blogPost;
     }
@@ -42,7 +46,7 @@ public class BlogPostDAO {
                 blogPosts.add(blogPost);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("Lỗi SQL khi thực hiện: {}", e.getMessage(), e);
         }
         return blogPosts;
     }
@@ -60,7 +64,7 @@ public class BlogPostDAO {
                 blogPosts.add(blogPost);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("Lỗi SQL khi thực hiện: {}", e.getMessage(), e);
         }
         return blogPosts;
     }
@@ -84,7 +88,7 @@ public class BlogPostDAO {
 
             rowInserted = stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("Lỗi SQL khi thực hiện: {}", e.getMessage(), e);
         }
         return rowInserted;
     }
@@ -108,7 +112,7 @@ public class BlogPostDAO {
 
             rowUpdated = stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("Lỗi SQL khi thực hiện: {}", e.getMessage(), e);
         }
         return rowUpdated;
     }
@@ -122,7 +126,7 @@ public class BlogPostDAO {
             stmt.setInt(1, id);
             rowDeleted = stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("Lỗi SQL khi thực hiện: {}", e.getMessage(), e);
         }
         return rowDeleted;
     }
@@ -153,7 +157,7 @@ public class BlogPostDAO {
                 count = rs.getInt(1);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("Lỗi SQL khi thực hiện: {}", e.getMessage(), e);
         }
         return count;
     }

@@ -12,8 +12,12 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @WebServlet("/admin/login")
 public class LoginServlet extends HttpServlet {
+    private static final Logger logger = LoggerFactory.getLogger(LoginServlet.class);
     private static final long serialVersionUID = 1L;
     private UserDAO userDAO;
 

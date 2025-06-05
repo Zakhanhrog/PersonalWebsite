@@ -10,7 +10,12 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class ExperienceDAO {
+    private static final Logger logger = LoggerFactory.getLogger(ExperienceDAO.class);
+
     private Experience extractExperienceFromResultSet(ResultSet rs) throws SQLException {
         Experience exp = new Experience();
         exp.setId(rs.getInt("id"));
@@ -35,7 +40,7 @@ public class ExperienceDAO {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+                logger.error("Lỗi SQL khi thực hiện [tên_hàm/mô_tả_ngắn_gọn]: {}", e.getMessage(), e);
         }
         return experiences;
     }
@@ -52,7 +57,7 @@ public class ExperienceDAO {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+                logger.error("Lỗi SQL khi thực hiện [tên_hàm/mô_tả_ngắn_gọn]: {}", e.getMessage(), e);
         }
         return exp;
     }
@@ -74,7 +79,7 @@ public class ExperienceDAO {
             stmt.setString(6, exp.getDescriptionResponsibilities());
             rowInserted = stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+                logger.error("Lỗi SQL khi thực hiện [tên_hàm/mô_tả_ngắn_gọn]: {}", e.getMessage(), e);
         }
         return rowInserted;
     }
@@ -97,7 +102,7 @@ public class ExperienceDAO {
             stmt.setInt(7, exp.getProfileId());
             rowUpdated = stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+                logger.error("Lỗi SQL khi thực hiện [tên_hàm/mô_tả_ngắn_gọn]: {}", e.getMessage(), e);
         }
         return rowUpdated;
     }
@@ -110,7 +115,7 @@ public class ExperienceDAO {
             stmt.setInt(1, experienceId);
             rowDeleted = stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+                logger.error("Lỗi SQL khi thực hiện [tên_hàm/mô_tả_ngắn_gọn]: {}", e.getMessage(), e);
         }
         return rowDeleted;
     }

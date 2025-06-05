@@ -2,8 +2,8 @@ package com.bachnt.web.servlet.admin;
 
 import com.bachnt.dao.ProjectDAO;
 import com.bachnt.model.Project;
-import com.bachnt.dao.ProfileDAO; // Assuming you might want profile info for admin header
-import com.bachnt.model.Profile;  // Assuming you might want profile info for admin header
+import com.bachnt.dao.ProfileDAO;
+import com.bachnt.model.Profile;
 
 
 import javax.servlet.ServletException;
@@ -23,6 +23,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @WebServlet("/admin/projects")
 @MultipartConfig(
         fileSizeThreshold = 1024 * 1024 * 1,  // 1 MB
@@ -30,6 +33,7 @@ import java.util.UUID;
         maxRequestSize = 1024 * 1024 * 15 // 15 MB
 )
 public class AdminProjectServlet extends HttpServlet {
+    private static final Logger logger = LoggerFactory.getLogger(AdminProjectServlet.class);
     private static final long serialVersionUID = 1L;
     private ProjectDAO projectDAO;
     private ProfileDAO profileDAO;
@@ -82,8 +86,8 @@ public class AdminProjectServlet extends HttpServlet {
                     break;
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            request.setAttribute("messageError", "Lỗi xử lý yêu cầu GET: " + e.getMessage());
+            logger.error("Lỗi xử lý yêu cầu GET cho action: {}", action, e);
+            session.setAttribute("projectUpdateMessageError", "Lỗi hệ thống nghiêm trọng, vui lòng thử lại sau.");
             listProjects(request, response);
         }
     }
@@ -112,8 +116,8 @@ public class AdminProjectServlet extends HttpServlet {
                     break;
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            session.setAttribute("projectMessageError", "Lỗi hệ thống khi xử lý POST: " + e.getMessage());
+            logger.error("Lỗi khi xử lý yêu cầu POST cho action: {}", action, e.getMessage(), e);
+            session.setAttribute("projectUpdateMessageError", "Lỗi hệ thống nghiêm trọng, vui lòng thử lại sau.");
             response.sendRedirect(request.getContextPath() + "/admin/projects");
         }
     }
@@ -144,7 +148,7 @@ public class AdminProjectServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/admin/projects");
             }
         } catch (NumberFormatException e) {
-            session.setAttribute("projectMessageError", "ID dự án không hợp lệ.");
+            session.setAttribute("projectUpdateMessageError", "Lỗi hệ thống nghiêm trọng, vui lòng thử lại sau.");
             response.sendRedirect(request.getContextPath() + "/admin/projects");
         }
     }
@@ -164,7 +168,7 @@ public class AdminProjectServlet extends HttpServlet {
                 project.setImageUrl(existingProject.getImageUrl()); // Mặc định giữ ảnh cũ
                 project.setStartDate(existingProject.getStartDate()); // Giữ ngày tạo/bắt đầu cũ nếu không được cung cấp mới
             } else {
-                isNew = true; // Coi như tạo mới nếu không tìm thấy
+                isNew = true; 
             }
         }
 
@@ -191,13 +195,13 @@ public class AdminProjectServlet extends HttpServlet {
                 project.setEndDate(null);
             }
         } catch (ParseException e) {
-            e.printStackTrace();
-            session.setAttribute("projectMessageError", "Lỗi định dạng ngày tháng (yyyy-MM-dd).");
+            logger.error("Lỗi khi phân tích ngày tháng: {}", e.getMessage(), e);
+            session.setAttribute("projectUpdateMessageError", "Lỗi hệ thống nghiêm trọng, vui lòng thử lại sau.");
             response.sendRedirect(request.getContextPath() + (isNew ? "/admin/projects?action=add" : "/admin/projects?action=edit&id="+idParam) );
             return;
         }
 
-        Part filePart = request.getPart("imageFile"); // Tên input file trong JSP
+        Part filePart = request.getPart("imageFile"); 
         String currentImageUrl = project.getImageUrl();
         String newImageUrlFromUpload = null;
         boolean imageActionTaken = false;
@@ -234,8 +238,8 @@ public class AdminProjectServlet extends HttpServlet {
                         if (oldFilePhysical.exists()) oldFilePhysical.delete();
                     }
                 } catch (IOException e) {
-                    e.printStackTrace();
-                    session.setAttribute("projectMessageError", "Lỗi khi ghi file ảnh dự án: " + e.getMessage());
+                    logger.error("Lỗi khi ghi file ảnh dự án: {}", e.getMessage(), e);
+                    session.setAttribute("projectUpdateMessageError", "Lỗi hệ thống nghiêm trọng, vui lòng thử lại sau.");
                 }
             }
         }
@@ -266,7 +270,7 @@ public class AdminProjectServlet extends HttpServlet {
         }
 
         if (!success && !imageActionTaken && overallMessage.isEmpty()) {
-            session.setAttribute("projectMessageError", "Lỗi: Không thể lưu thông tin dự án.");
+            session.setAttribute("projectUpdateMessageError", "Lỗi hệ thống nghiêm trọng, vui lòng thử lại sau.");
         }
         response.sendRedirect(request.getContextPath() + "/admin/projects");
     }
@@ -292,8 +296,8 @@ public class AdminProjectServlet extends HttpServlet {
         } catch (NumberFormatException e) {
             session.setAttribute("projectMessageError", "ID dự án không hợp lệ để xóa.");
         } catch (Exception e){
-            e.printStackTrace();
-            session.setAttribute("projectMessageError", "Lỗi hệ thống khi xóa dự án: " + e.getMessage());
+            logger.error("Lỗi khi xóa dự án: {}", e.getMessage(), e);
+            session.setAttribute("projectUpdateMessageError", "Lỗi hệ thống nghiêm trọng, vui lòng thử lại sau.");
         }
         if(redirectToList){
             response.sendRedirect(request.getContextPath() + "/admin/projects");

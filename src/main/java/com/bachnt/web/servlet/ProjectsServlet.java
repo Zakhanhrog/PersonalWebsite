@@ -46,7 +46,6 @@ public class ProjectsServlet extends HttpServlet {
 
         request.setAttribute("projects", projects);
 
-        // Get distinct categories for filter options
         List<String> projectCategories = projectDAO.getAllProjects().stream()
                 .map(Project::getCategory)
                 .filter(c -> c != null && !c.trim().isEmpty())

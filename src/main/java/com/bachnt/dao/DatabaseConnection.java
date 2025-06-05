@@ -6,8 +6,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class DatabaseConnection {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+public class DatabaseConnection {
+    private static final Logger logger = LoggerFactory.getLogger(DatabaseConnection.class);
     private static final String URL = "jdbc:mysql://localhost:3306/personalwebdb?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
     private static final String USER = "root";
     private static final String PASSWORD = "khanh7679";
@@ -16,7 +19,7 @@ public class DatabaseConnection {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+                logger.error("Lỗi SQL khi thực hiện [tên_hàm/mô_tả_ngắn_gọn]: {}", e.getMessage(), e);
             throw new RuntimeException("MySQL JDBC Driver not found. Application cannot start.", e);
         }
     }
@@ -32,7 +35,7 @@ public class DatabaseConnection {
                     connection.close();
                 }
             } catch (SQLException e) {
-                e.printStackTrace();
+                    logger.error("Lỗi SQL khi thực hiện [tên_hàm/mô_tả_ngắn_gọn]: {}", e.getMessage(), e);
             }
         }
     }
@@ -42,7 +45,7 @@ public class DatabaseConnection {
             try {
                 stmt.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                    logger.error("Lỗi SQL khi thực hiện [tên_hàm/mô_tả_ngắn_gọn]: {}", e.getMessage(), e);
             }
         }
     }
@@ -52,7 +55,7 @@ public class DatabaseConnection {
             try {
                 rs.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                    logger.error("Lỗi SQL khi thực hiện [tên_hàm/mô_tả_ngắn_gọn]: {}", e.getMessage(), e);
             }
         }
     }

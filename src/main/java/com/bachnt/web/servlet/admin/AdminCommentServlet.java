@@ -14,8 +14,12 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @WebServlet("/admin/comments")
 public class AdminCommentServlet extends HttpServlet {
+    private static final Logger logger = LoggerFactory.getLogger(AdminCommentServlet.class);
     private static final long serialVersionUID = 1L;
     private CommentDAO commentDAO;
     private ProfileDAO profileDAO;
@@ -61,8 +65,8 @@ public class AdminCommentServlet extends HttpServlet {
                     break;
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            request.setAttribute("messageError", "Lỗi xử lý yêu cầu GET: " + e.getMessage());
+            logger.error("Lỗi khi xử lý yêu cầu GET: {}", e.getMessage(), e);
+            session.setAttribute("commentUpdateError", "Lỗi hệ thống nghiêm trọng, vui lòng thử lại sau.");
             listComments(request, response);
         }
     }
@@ -89,8 +93,8 @@ public class AdminCommentServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/admin/comments");
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            session.setAttribute("commentMessageError", "Lỗi hệ thống khi xử lý POST: " + e.getMessage());
+            logger.error("Lỗi khi xử lý yêu cầu POST: {}", e.getMessage(), e);
+            session.setAttribute("commentUpdateError", "Lỗi hệ thống nghiêm trọng, vui lòng thử lại sau.");
             response.sendRedirect(request.getContextPath() + "/admin/comments");
         }
     }
@@ -114,7 +118,8 @@ public class AdminCommentServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/admin/comments");
             }
         } catch (NumberFormatException e) {
-            session.setAttribute("commentMessageError", "ID bình luận không hợp lệ.");
+            logger.error("Lỗi khi chuyển đổi ID bình luận: {}", e.getMessage(), e);
+            session.setAttribute("commentUpdateError", "Lỗi hệ thống nghiêm trọng, vui lòng thử lại sau.");
             response.sendRedirect(request.getContextPath() + "/admin/comments");
         }
     }
@@ -140,8 +145,8 @@ public class AdminCommentServlet extends HttpServlet {
         } catch (NumberFormatException e) {
             session.setAttribute("commentMessageError", "ID bình luận không hợp lệ khi lưu.");
         } catch (Exception e) {
-            e.printStackTrace();
-            session.setAttribute("commentMessageError", "Lỗi máy chủ khi cập nhật nội dung bình luận.");
+            logger.error("Lỗi khi lưu bình luận: {}", e.getMessage(), e);
+            session.setAttribute("commentUpdateError", "Lỗi hệ thống nghiêm trọng, vui lòng thử lại sau.");
         }
         response.sendRedirect(request.getContextPath() + "/admin/comments");
     }
@@ -165,8 +170,8 @@ public class AdminCommentServlet extends HttpServlet {
         } catch (NumberFormatException e) {
             session.setAttribute("commentMessageError", "ID bình luận không hợp lệ khi cập nhật trạng thái.");
         } catch (Exception e) {
-            e.printStackTrace();
-            session.setAttribute("commentMessageError", "Lỗi máy chủ khi cập nhật trạng thái.");
+            logger.error("Lỗi khi cập nhật trạng thái bình luận: {}", e.getMessage(), e);
+            session.setAttribute("commentUpdateError", "Lỗi hệ thống nghiêm trọng, vui lòng thử lại sau.");
         }
         response.sendRedirect(request.getContextPath() + "/admin/comments");
     }
@@ -184,8 +189,8 @@ public class AdminCommentServlet extends HttpServlet {
         } catch (NumberFormatException e) {
             session.setAttribute("commentMessageError", "ID bình luận không hợp lệ để xóa.");
         } catch (Exception e) {
-            e.printStackTrace();
-            session.setAttribute("commentMessageError", "Lỗi máy chủ khi xóa bình luận.");
+            logger.error("Lỗi khi xóa bình luận: {}", e.getMessage(), e);
+            session.setAttribute("commentUpdateError", "Lỗi hệ thống nghiêm trọng, vui lòng thử lại sau.");
         }
         if(redirectToList){
             response.sendRedirect(request.getContextPath() + "/admin/comments");

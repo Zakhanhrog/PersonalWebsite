@@ -14,8 +14,12 @@ import com.bachnt.dao.ProfileDAO;
 import com.bachnt.model.BlogPost;
 import com.bachnt.model.Profile;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @WebServlet("/blog")
 public class BlogServlet extends HttpServlet {
+    private static final Logger logger = LoggerFactory.getLogger(BlogServlet.class);
     private static final long serialVersionUID = 1L;
     private BlogPostDAO blogPostDAO;
     private ProfileDAO profileDAO;

@@ -9,30 +9,30 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.bachnt.dao.ProfileDAO;
-import com.bachnt.dao.EducationDAO;  // THÊM IMPORT
-import com.bachnt.dao.ExperienceDAO; // THÊM IMPORT
-import com.bachnt.dao.TestimonialDAO;// THÊM IMPORT
+import com.bachnt.dao.EducationDAO;  
+import com.bachnt.dao.ExperienceDAO; 
+import com.bachnt.dao.TestimonialDAO;
 import com.bachnt.model.Profile;
 import com.bachnt.model.Skill;
-import com.bachnt.model.Education;   // THÊM IMPORT
-import com.bachnt.model.Experience;  // THÊM IMPORT
-import com.bachnt.model.Testimonial; // THÊM IMPORT
+import com.bachnt.model.Education;   
+import com.bachnt.model.Experience;  
+import com.bachnt.model.Testimonial; 
 
 
 @WebServlet("/about")
 public class AboutServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private ProfileDAO profileDAO;
-    private EducationDAO educationDAO;   // KHAI BÁO
-    private ExperienceDAO experienceDAO; // KHAI BÁO
-    private TestimonialDAO testimonialDAO; // KHAI BÁO
+    private EducationDAO educationDAO;   
+    private ExperienceDAO experienceDAO; 
+    private TestimonialDAO testimonialDAO; 
 
     @Override
     public void init() throws ServletException {
         profileDAO = new ProfileDAO();
-        educationDAO = new EducationDAO();   // KHỞI TẠO
-        experienceDAO = new ExperienceDAO(); // KHỞI TẠO
-        testimonialDAO = new TestimonialDAO(); // KHỞI TẠO
+        educationDAO = new EducationDAO();   
+        experienceDAO = new ExperienceDAO(); 
+        testimonialDAO = new TestimonialDAO(); 
     }
 
     @Override
@@ -54,7 +54,6 @@ public class AboutServlet extends HttpServlet {
             request.setAttribute("pageTitle", "Giới Thiệu");
         }
 
-        // Testimonials có thể không phụ thuộc vào profile cụ thể nếu là đánh giá chung
         List<Testimonial> testimonials = testimonialDAO.getAllDisplayableTestimonials();
         request.setAttribute("testimonialsList", testimonials);
 

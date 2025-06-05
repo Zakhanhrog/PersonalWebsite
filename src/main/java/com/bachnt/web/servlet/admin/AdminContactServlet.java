@@ -14,8 +14,12 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @WebServlet("/admin/messages")
 public class AdminContactServlet extends HttpServlet {
+    private static final Logger logger = LoggerFactory.getLogger(AdminContactServlet.class);
     private static final long serialVersionUID = 1L;
     private ContactMessageDAO contactMessageDAO;
     private ProfileDAO profileDAO;
@@ -29,13 +33,10 @@ public class AdminContactServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
-        // Auth filter đã xử lý việc đăng nhập
 
         String action = request.getParameter("action");
-        // Mặc định là list, không cần gán lại nếu null vì switch sẽ vào default
 
         try {
-            // Xử lý các thông báo từ session (sau redirect từ POST)
             HttpSession session = request.getSession();
             if (session.getAttribute("messageOperationStatus") != null) {
                 request.setAttribute("operationStatus", session.getAttribute("messageOperationStatus"));
@@ -46,16 +47,13 @@ public class AdminContactServlet extends HttpServlet {
                 session.removeAttribute("messageOperationError");
             }
 
-            // Chỉ có action delete là có thể xử lý qua GET (mặc dù POST được khuyến khích hơn)
-            // Các action khác như view chi tiết thường không thay đổi trạng thái DB qua GET
             if ("delete".equals(action)) {
-                handleDeleteMessage(request, response, true); // true để biết là redirect
+                handleDeleteMessage(request, response, true);
             } else {
-                // Tất cả các trường hợp khác (bao gồm action=null hoặc action=list) sẽ hiển thị danh sách
                 listMessages(request, response);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Yêu cầu thông báo quản trị viên xử lý lỗi", action, e.getMessage(), e);
             request.setAttribute("operationError", "Lỗi không xác định: " + e.getMessage());
             listMessages(request, response);
         }
@@ -64,7 +62,6 @@ public class AdminContactServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
-        // Auth filter đã xử lý
 
         String action = request.getParameter("action");
         if (action == null) {
@@ -81,19 +78,18 @@ public class AdminContactServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/admin/messages?error=InvalidPostAction");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Lỗi khi xử lý yêu cầu POST: {}", e.getMessage(), e);
             HttpSession session = request.getSession();
-            session.setAttribute("messageOperationError", "Lỗi hệ thống khi xử lý yêu cầu: " + e.getMessage());
+            session.setAttribute("contactUpdateError", "Lỗi hệ thống nghiêm trọng, vui lòng thử lại sau.");
             response.sendRedirect(request.getContextPath() + "/admin/messages");
         }
     }
 
     private void listMessages(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         List<ContactMessage> messages = contactMessageDAO.getAllContactMessages();
-        Profile profile = profileDAO.getDefaultProfile(); // Lấy profile cho tên website
-
+        Profile profile = profileDAO.getDefaultProfile();
         request.setAttribute("messages", messages);
-        request.setAttribute("profileAdmin", profile); // Đặt tên khác để tránh trùng với profile của trang public nếu có
+        request.setAttribute("profileAdmin", profile);
         request.getRequestDispatcher("/admin/messages.jsp").forward(request, response);
     }
 
@@ -118,8 +114,8 @@ public class AdminContactServlet extends HttpServlet {
         } catch (NumberFormatException e) {
             session.setAttribute("messageOperationError", "ID tin nhắn không hợp lệ.");
         } catch (Exception e) {
-            e.printStackTrace();
-            session.setAttribute("messageOperationError", "Lỗi máy chủ khi cập nhật trạng thái.");
+            logger.error("Lỗi khi cập nhật trạng thái tin nhắn", e);
+            session.setAttribute("contactUpdateError", "Lỗi hệ thống nghiêm trọng, vui lòng thử lại sau.");
         }
         response.sendRedirect(request.getContextPath() + "/admin/messages");
     }
@@ -137,13 +133,13 @@ public class AdminContactServlet extends HttpServlet {
         } catch (NumberFormatException e) {
             session.setAttribute("messageOperationError", "ID tin nhắn không hợp lệ để xóa.");
         } catch (Exception e) {
-            e.printStackTrace();
-            session.setAttribute("messageOperationError", "Lỗi máy chủ khi xóa tin nhắn.");
+            logger.error("Lỗi khi xóa tin nhắn", e);
+            session.setAttribute("contactUpdateError", "Lỗi hệ thống nghiêm trọng, vui lòng thử lại sau.");
         }
 
         if (redirect) {
             response.sendRedirect(request.getContextPath() + "/admin/messages");
-        } else { // Nếu không redirect (ví dụ xử lý AJAX), ta có thể không làm gì hoặc forward lại
+        } else {
             listMessages(request, response);
         }
     }

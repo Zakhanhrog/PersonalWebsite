@@ -12,23 +12,27 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.bachnt.dao.BlogPostDAO;
 import com.bachnt.dao.ProfileDAO;
-import com.bachnt.dao.CommentDAO; // THÊM IMPORT
+import com.bachnt.dao.CommentDAO;
 import com.bachnt.model.BlogPost;
 import com.bachnt.model.Profile;
-import com.bachnt.model.Comment; // THÊM IMPORT
+import com.bachnt.model.Comment;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @WebServlet("/blog/post")
 public class BlogPostServlet extends HttpServlet {
+    private static final Logger logger = LoggerFactory.getLogger(BlogPostServlet.class);
     private static final long serialVersionUID = 1L;
     private BlogPostDAO blogPostDAO;
     private ProfileDAO profileDAO;
-    private CommentDAO commentDAO; // KHAI BÁO COMMENTDAO
+    private CommentDAO commentDAO;
 
     @Override
     public void init() throws ServletException {
         blogPostDAO = new BlogPostDAO();
         profileDAO = new ProfileDAO();
-        commentDAO = new CommentDAO(); // KHỞI TẠO COMMENTDAO
+        commentDAO = new CommentDAO();
     }
 
     @Override
@@ -52,9 +56,8 @@ public class BlogPostServlet extends HttpServlet {
                 }
                 request.setAttribute("blogPost", blogPost);
 
-                // LẤY COMMENTS CHO BÀI VIẾT
                 List<Comment> comments = commentDAO.getApprovedCommentsByPostId(postId);
-                request.setAttribute("commentsList", comments); // Đặt tên là commentsList
+                request.setAttribute("commentsList", comments);
 
                 request.setAttribute("pageTitle", blogPost.getTitle());
                 if (profile != null) {
@@ -128,7 +131,6 @@ public class BlogPostServlet extends HttpServlet {
                     try {
                         newComment.setParentCommentId(Integer.parseInt(parentCommentIdStr));
                     } catch (NumberFormatException e) {
-                        // Bỏ qua nếu parentCommentId không hợp lệ, comment sẽ là comment gốc
                     }
                 }
 
@@ -147,7 +149,7 @@ public class BlogPostServlet extends HttpServlet {
                     response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid Post ID for comment.");
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error("Error while saving comment: {}", e.getMessage(), e);
                 String postIdParam = request.getParameter("postId");
                 response.sendRedirect(request.getContextPath() + "/blog/post?id=" + postIdParam + "&commentError=serverError#comments");
             }

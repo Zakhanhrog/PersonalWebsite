@@ -9,7 +9,12 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class TestimonialDAO {
+    private static final Logger logger = LoggerFactory.getLogger(TestimonialDAO.class);
+
     private Testimonial extractTestimonialFromResultSet(ResultSet rs) throws SQLException {
         Testimonial testimonial = new Testimonial();
         testimonial.setId(rs.getInt("id"));
@@ -32,7 +37,7 @@ public class TestimonialDAO {
                 testimonials.add(extractTestimonialFromResultSet(rs));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+                logger.error("Lỗi SQL khi thực hiện [tên_hàm/mô_tả_ngắn_gọn]: {}", e.getMessage(), e);
         }
         return testimonials;
     }
@@ -48,7 +53,7 @@ public class TestimonialDAO {
                 testimonials.add(extractTestimonialFromResultSet(rs));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+                logger.error("Lỗi SQL khi thực hiện [tên_hàm/mô_tả_ngắn_gọn]: {}", e.getMessage(), e);
         }
         return testimonials;
     }
@@ -66,7 +71,7 @@ public class TestimonialDAO {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+                logger.error("Lỗi SQL khi thực hiện [tên_hàm/mô_tả_ngắn_gọn]: {}", e.getMessage(), e);
         }
         return testimonial;
     }
@@ -84,7 +89,7 @@ public class TestimonialDAO {
             stmt.setInt(5, testimonial.getDisplayOrder());
             rowInserted = stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+                logger.error("Lỗi SQL khi thực hiện [tên_hàm/mô_tả_ngắn_gọn]: {}", e.getMessage(), e);
         }
         return rowInserted;
     }
@@ -103,7 +108,7 @@ public class TestimonialDAO {
             stmt.setInt(6, testimonial.getId());
             rowUpdated = stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+                logger.error("Lỗi SQL khi thực hiện [tên_hàm/mô_tả_ngắn_gọn]: {}", e.getMessage(), e);
         }
         return rowUpdated;
     }
@@ -117,7 +122,7 @@ public class TestimonialDAO {
             stmt.setInt(1, testimonialId);
             rowDeleted = stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+                logger.error("Lỗi SQL khi thực hiện [tên_hàm/mô_tả_ngắn_gọn]: {}", e.getMessage(), e);
         }
         return rowDeleted;
     }

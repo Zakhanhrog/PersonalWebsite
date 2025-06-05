@@ -9,7 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 import com.bachnt.model.Project;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class ProjectDAO {
+    private static final Logger logger = LoggerFactory.getLogger(ProjectDAO.class);
 
     public Project getProjectById(int id) {
         Project project = null;
@@ -25,7 +29,7 @@ public class ProjectDAO {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+                logger.error("Lỗi SQL khi thực hiện [tên_hàm/mô_tả_ngắn_gọn]: {}", e.getMessage(), e);
         }
         return project;
     }
@@ -43,7 +47,7 @@ public class ProjectDAO {
                 projects.add(project);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+                logger.error("Lỗi SQL khi thực hiện [tên_hàm/mô_tả_ngắn_gọn]: {}", e.getMessage(), e);
         }
         return projects;
     }
@@ -67,7 +71,7 @@ public class ProjectDAO {
 
             rowInserted = stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+                logger.error("Lỗi SQL khi thực hiện [tên_hàm/mô_tả_ngắn_gọn]: {}", e.getMessage(), e);
         }
         return rowInserted;
     }
@@ -92,7 +96,7 @@ public class ProjectDAO {
 
             rowUpdated = stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+                logger.error("Lỗi SQL khi thực hiện [tên_hàm/mô_tả_ngắn_gọn]: {}", e.getMessage(), e);
         }
         return rowUpdated;
     }
@@ -106,7 +110,7 @@ public class ProjectDAO {
             stmt.setInt(1, id);
             rowDeleted = stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+                logger.error("Lỗi SQL khi thực hiện [tên_hàm/mô_tả_ngắn_gọn]: {}", e.getMessage(), e);
         }
         return rowDeleted;
     }
@@ -136,7 +140,7 @@ public class ProjectDAO {
                 count = rs.getInt(1);
             }
         } catch (SQLException e) {
-            e.printStackTrace(); // Nên dùng logging
+                logger.error("Lỗi SQL khi thực hiện [tên_hàm/mô_tả_ngắn_gọn]: {}", e.getMessage(), e); // Nên dùng logging
         }
         return count;
     }

@@ -10,7 +10,11 @@ import java.util.Date;
 import java.util.List;
 import com.bachnt.model.ContactMessage;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class ContactMessageDAO {
+    private static final Logger logger = LoggerFactory.getLogger(ContactMessageDAO.class);
 
     public boolean saveContactMessage(ContactMessage message) {
         String sql = "INSERT INTO contact_messages (name, email, subject, message, created_date, status) VALUES (?, ?, ?, ?, ?, ?)";
@@ -29,7 +33,7 @@ public class ContactMessageDAO {
             int rowsAffected = stmt.executeUpdate();
             success = (rowsAffected > 0);
         } catch (SQLException e) {
-            e.printStackTrace();
+                logger.error("Lỗi SQL khi thực hiện [tên_hàm/mô_tả_ngắn_gọn]: {}", e.getMessage(), e);
         }
         return success;
     }
@@ -47,7 +51,7 @@ public class ContactMessageDAO {
                 messages.add(message);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+                logger.error("Lỗi SQL khi thực hiện [tên_hàm/mô_tả_ngắn_gọn]: {}", e.getMessage(), e);
         }
         return messages;
     }
@@ -66,7 +70,7 @@ public class ContactMessageDAO {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+                logger.error("Lỗi SQL khi thực hiện [tên_hàm/mô_tả_ngắn_gọn]: {}", e.getMessage(), e);
         }
         return message;
     }
@@ -84,7 +88,7 @@ public class ContactMessageDAO {
             int rowsAffected = stmt.executeUpdate();
             success = (rowsAffected > 0);
         } catch (SQLException e) {
-            e.printStackTrace();
+                logger.error("Lỗi SQL khi thực hiện [tên_hàm/mô_tả_ngắn_gọn]: {}", e.getMessage(), e);
         }
         return success;
     }
@@ -98,7 +102,7 @@ public class ContactMessageDAO {
             stmt.setInt(1, id);
             rowDeleted = stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+                logger.error("Lỗi SQL khi thực hiện [tên_hàm/mô_tả_ngắn_gọn]: {}", e.getMessage(), e);
         }
         return rowDeleted;
     }
@@ -125,7 +129,7 @@ public class ContactMessageDAO {
                 count = rs.getInt(1);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+                logger.error("Lỗi SQL khi thực hiện [tên_hàm/mô_tả_ngắn_gọn]: {}", e.getMessage(), e);
         }
         return count;
     }

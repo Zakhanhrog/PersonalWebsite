@@ -20,6 +20,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @WebServlet("/admin/blog")
 @MultipartConfig(
         fileSizeThreshold = 1024 * 1024 * 1,
@@ -27,6 +30,7 @@ import java.util.UUID;
         maxRequestSize = 1024 * 1024 * 15
 )
 public class AdminBlogServlet extends HttpServlet {
+    private static final Logger logger = LoggerFactory.getLogger(BlogPostDAO.class);
     private static final long serialVersionUID = 1L;
     private BlogPostDAO blogPostDAO;
     private ProfileDAO profileDAO;
@@ -78,8 +82,8 @@ public class AdminBlogServlet extends HttpServlet {
                     break;
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            request.setAttribute("messageError", "Lỗi xử lý yêu cầu GET: " + e.getMessage());
+            logger.error("Lỗi không mong muốn trong AdminBlogServlet action {}: {}", action, e.getMessage(), e);
+            session.setAttribute("blogUpdateError", "Lỗi hệ thống nghiêm trọng, vui lòng thử lại sau.");
             listPosts(request, response);
         }
     }
@@ -108,8 +112,8 @@ public class AdminBlogServlet extends HttpServlet {
                     break;
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            session.setAttribute("blogMessageError", "Lỗi hệ thống khi xử lý POST: " + e.getMessage());
+            logger.error("Lỗi không mong muốn trong AdminBlogServlet action {}: {}", action, e.getMessage(), e);
+            session.setAttribute("blogUpdateError", "Lỗi hệ thống nghiêm trọng, vui lòng thử lại sau.");
             response.sendRedirect(request.getContextPath() + "/admin/blog");
         }
     }
@@ -143,7 +147,7 @@ public class AdminBlogServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/admin/blog");
             }
         } catch (NumberFormatException e) {
-            session.setAttribute("blogMessageError", "ID bài viết không hợp lệ.");
+            session.setAttribute("blogUpdateError", "Lỗi hệ thống nghiêm trọng, vui lòng thử lại sau.");
             response.sendRedirect(request.getContextPath() + "/admin/blog");
         }
     }
@@ -216,8 +220,8 @@ public class AdminBlogServlet extends HttpServlet {
                         if (oldFilePhysical.exists()) oldFilePhysical.delete();
                     }
                 } catch (IOException e) {
-                    e.printStackTrace();
-                    session.setAttribute("blogMessageError", "Lỗi khi ghi file ảnh bài viết: " + e.getMessage());
+                    logger.error("Lỗi không mong muốn trong AdminBlogServlet action {}: {}", e.getMessage(), e);
+                    session.setAttribute("blogUpdateError", "Lỗi hệ thống nghiêm trọng, vui lòng thử lại sau.");
                 }
             }
         }
@@ -274,8 +278,8 @@ public class AdminBlogServlet extends HttpServlet {
         } catch (NumberFormatException e) {
             session.setAttribute("blogMessageError", "ID bài viết không hợp lệ để xóa.");
         } catch (Exception e){
-            e.printStackTrace();
-            session.setAttribute("blogMessageError", "Lỗi hệ thống khi xóa bài viết: " + e.getMessage());
+            logger.error("Lỗi không mong muốn trong AdminBlogServlet action {}: {}", e.getMessage(), e);
+            session.setAttribute("blogUpdateError", "Lỗi hệ thống nghiêm trọng, vui lòng thử lại sau.");
         }
         if(redirectToList){
             response.sendRedirect(request.getContextPath() + "/admin/blog");

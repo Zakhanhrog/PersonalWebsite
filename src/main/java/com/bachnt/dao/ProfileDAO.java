@@ -9,7 +9,11 @@ import java.util.List;
 import com.bachnt.model.Profile;
 import com.bachnt.model.Skill;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class ProfileDAO {
+    private static final Logger logger = LoggerFactory.getLogger(ProfileDAO.class);
 
     public Profile getProfileById(int id) {
         Profile profile = null;
@@ -25,7 +29,7 @@ public class ProfileDAO {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+                logger.error("Lỗi SQL khi thực hiện [tên_hàm/mô_tả_ngắn_gọn]: {}", e.getMessage(), e);
         }
         return profile;
     }
@@ -53,7 +57,7 @@ public class ProfileDAO {
 
             rowUpdated = stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+                logger.error("Lỗi SQL khi thực hiện [tên_hàm/mô_tả_ngắn_gọn]: {}", e.getMessage(), e);
         }
         return rowUpdated;
     }
@@ -73,7 +77,7 @@ public class ProfileDAO {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+                logger.error("Lỗi SQL khi thực hiện [tên_hàm/mô_tả_ngắn_gọn]: {}", e.getMessage(), e);
         }
         return skills;
     }
@@ -91,7 +95,7 @@ public class ProfileDAO {
 
             rowInserted = stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+                logger.error("Lỗi SQL khi thực hiện [tên_hàm/mô_tả_ngắn_gọn]: {}", e.getMessage(), e);
         }
         return rowInserted;
     }
@@ -110,7 +114,7 @@ public class ProfileDAO {
 
             rowUpdated = stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+                logger.error("Lỗi SQL khi thực hiện [tên_hàm/mô_tả_ngắn_gọn]: {}", e.getMessage(), e);
         }
         return rowUpdated;
     }
@@ -124,7 +128,7 @@ public class ProfileDAO {
             stmt.setInt(1, skillId);
             rowDeleted = stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+                logger.error("Lỗi SQL khi thực hiện [tên_hàm/mô_tả_ngắn_gọn]: {}", e.getMessage(), e);
         }
         return rowDeleted;
     }

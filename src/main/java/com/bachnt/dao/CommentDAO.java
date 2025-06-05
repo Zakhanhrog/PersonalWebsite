@@ -10,7 +10,11 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class CommentDAO {
+    private static final Logger logger = LoggerFactory.getLogger(CommentDAO.class);
 
     private Comment extractCommentFromResultSet(ResultSet rs) throws SQLException {
         Comment comment = new Comment();
@@ -38,7 +42,7 @@ public class CommentDAO {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+                logger.error("Lỗi SQL khi thực hiện [tên_hàm/mô_tả_ngắn_gọn]: {}", e.getMessage(), e);
         }
         return comments;
     }
@@ -69,7 +73,7 @@ public class CommentDAO {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+                logger.error("Lỗi SQL khi thực hiện [tên_hàm/mô_tả_ngắn_gọn]: {}", e.getMessage(), e);
         }
         return rowInserted;
     }
@@ -90,7 +94,7 @@ public class CommentDAO {
                 comments.add(comment);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+                logger.error("Lỗi SQL khi thực hiện [tên_hàm/mô_tả_ngắn_gọn]: {}", e.getMessage(), e);
         }
         return comments;
     }
@@ -108,7 +112,7 @@ public class CommentDAO {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+                logger.error("Lỗi SQL khi thực hiện [tên_hàm/mô_tả_ngắn_gọn]: {}", e.getMessage(), e);
         }
         return comment;
     }
@@ -123,7 +127,7 @@ public class CommentDAO {
             stmt.setInt(2, commentId);
             rowUpdated = stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+                logger.error("Lỗi SQL khi thực hiện [tên_hàm/mô_tả_ngắn_gọn]: {}", e.getMessage(), e);
         }
         return rowUpdated;
     }
@@ -138,7 +142,7 @@ public class CommentDAO {
             stmt.setInt(2, commentId);
             rowUpdated = stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+                logger.error("Lỗi SQL khi thực hiện [tên_hàm/mô_tả_ngắn_gọn]: {}", e.getMessage(), e);
         }
         return rowUpdated;
     }
@@ -153,7 +157,7 @@ public class CommentDAO {
             // Cũng nên xóa các comment con nếu có, hoặc CSDL tự xử lý qua FOREIGN KEY ON DELETE CASCADE
             rowDeleted = stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+                logger.error("Lỗi SQL khi thực hiện [tên_hàm/mô_tả_ngắn_gọn]: {}", e.getMessage(), e);
         }
         return rowDeleted;
     }

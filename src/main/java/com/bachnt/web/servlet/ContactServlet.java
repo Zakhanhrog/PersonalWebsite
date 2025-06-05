@@ -14,8 +14,12 @@ import com.bachnt.dao.ProfileDAO;
 import com.bachnt.model.ContactMessage;
 import com.bachnt.model.Profile;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @WebServlet("/contact")
 public class ContactServlet extends HttpServlet {
+    private static final Logger logger = LoggerFactory.getLogger(ContactServlet.class);
     private static final long serialVersionUID = 1L;
     private ProfileDAO profileDAO;
     private ContactMessageDAO contactMessageDAO;
@@ -98,7 +102,6 @@ public class ContactServlet extends HttpServlet {
         ContactMessage contactMessage = new ContactMessage();
         contactMessage.setName(name.trim());
         contactMessage.setEmail(email.trim());
-        // contactMessage.setPhone(phone != null ? phone.trim() : ""); // Add phone to ContactMessage model if needed
         contactMessage.setSubject(subject.trim());
         contactMessage.setMessage(messageText.trim());
         contactMessage.setCreatedDate(new Date());
