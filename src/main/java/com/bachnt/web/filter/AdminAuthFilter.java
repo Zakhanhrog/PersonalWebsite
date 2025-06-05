@@ -9,11 +9,11 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 public class AdminAuthFilter implements Filter {
-    private ContactMessageDAO contactMessageDAO; // THÊM BIẾN
+    private ContactMessageDAO contactMessageDAO;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        contactMessageDAO = new ContactMessageDAO(); // KHỞI TẠO
+        contactMessageDAO = new ContactMessageDAO();
     }
 
     @Override
@@ -25,13 +25,17 @@ public class AdminAuthFilter implements Filter {
         HttpSession session = httpRequest.getSession(false);
 
         String path = httpRequest.getRequestURI().substring(httpRequest.getContextPath().length());
+        String queryString = httpRequest.getQueryString();
+        String fullPath = queryString != null ? path + "?" + queryString : path;
 
         boolean isStaticResource = path.startsWith("/admin/css/") || path.startsWith("/admin/js/") ||
                 path.startsWith("/resources/") || path.endsWith(".css") ||
                 path.endsWith(".js") || path.endsWith(".png") ||
                 path.endsWith(".jpg") || path.endsWith(".gif");
 
-        if (path.equals("/admin/login") || path.equals("/admin/login.jsp") || isStaticResource) {
+        // Allow login related paths and resources
+        if (path.equals("/admin/login") || path.equals("/admin/login.jsp") || 
+            path.equals("/admin/test-login.jsp") || path.equals("/admin") || isStaticResource) {
             chain.doFilter(request, response);
             return;
         }
@@ -50,6 +54,6 @@ public class AdminAuthFilter implements Filter {
 
     @Override
     public void destroy() {
-        // Dọn dẹp tài nguyên (nếu cần)
+
     }
 }

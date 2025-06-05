@@ -36,6 +36,7 @@
 
   <form action="${pageContext.request.contextPath}/admin/projects" method="post" enctype="multipart/form-data">
     <input type="hidden" name="action" value="save">
+    <input type="hidden" name="org.apache.catalina.filters.CSRF_NONCE" value="${sessionScope['org.apache.catalina.filters.CSRF_NONCE']}">
     <c:if test="${formAction == 'edit'}">
       <input type="hidden" name="id" value="${project.id}">
     </c:if>

@@ -82,6 +82,7 @@
                                     <td class="action-col">
                                         <a href="${pageContext.request.contextPath}/admin/testimonials?action=edit&id=${item.id}" class="btn btn-sm btn-warning mr-1" title="Sửa"><i class="fas fa-edit"></i></a>
                                         <form action="${pageContext.request.contextPath}/admin/testimonials" method="post" style="display:inline;">
+                                            <input type="hidden" name="org.apache.catalina.filters.CSRF_NONCE" value="${sessionScope['org.apache.catalina.filters.CSRF_NONCE']}">
                                             <input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="${item.id}">
                                             <button type="submit" class="btn btn-sm btn-danger" title="Xóa" onclick="return confirm('Bạn có chắc muốn xóa đánh giá này?');"><i class="fas fa-trash"></i></button>
                                         </form>

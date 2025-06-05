@@ -48,6 +48,7 @@
       <h4 class="card-title-custom">Thông Tin Cá Nhân & Công Ty</h4>
       <form action="${pageContext.request.contextPath}/admin/profile" method="post" enctype="multipart/form-data">
         <input type="hidden" name="action" value="updateProfile">
+        <input type="hidden" name="org.apache.catalina.filters.CSRF_NONCE" value="${sessionScope['org.apache.catalina.filters.CSRF_NONCE']}">
         <div class="form-row">
           <div class="form-group col-md-6">
             <label for="name">Họ tên *</label>
@@ -156,6 +157,7 @@
                   <td>
                     <form action="${pageContext.request.contextPath}/admin/profile" method="post" style="display: inline;">
                       <input type="hidden" name="action" value="deleteSkill">
+                      <input type="hidden" name="org.apache.catalina.filters.CSRF_NONCE" value="${sessionScope['org.apache.catalina.filters.CSRF_NONCE']}">
                       <input type="hidden" name="skillId" value="${skill.id}">
                       <button type="submit" class="btn btn-danger" onclick="return confirm('Bạn có chắc muốn xóa kỹ năng này?');"><i class="fas fa-trash"></i></button>
                     </form>
@@ -177,6 +179,7 @@
       <h5>Thêm Mục Học Vấn Mới</h5>
       <form action="${pageContext.request.contextPath}/admin/profile" method="post" class="mb-4">
         <input type="hidden" name="action" value="addEducation">
+        <input type="hidden" name="org.apache.catalina.filters.CSRF_NONCE" value="${sessionScope['org.apache.catalina.filters.CSRF_NONCE']}">
         <div class="form-row">
           <div class="form-group col-md-6"><label for="eduSchoolName">Tên trường/tổ chức *</label><input type="text" class="form-control form-control-sm" id="eduSchoolName" name="eduSchoolName" required></div>
           <div class="form-group col-md-6"><label for="eduDegree">Bằng cấp/Chứng chỉ</label><input type="text" class="form-control form-control-sm" id="eduDegree" name="eduDegree"></div>
@@ -207,6 +210,7 @@
                   <td>
                     <form action="${pageContext.request.contextPath}/admin/profile" method="post" style="display: inline;">
                       <input type="hidden" name="action" value="deleteEducation">
+                      <input type="hidden" name="org.apache.catalina.filters.CSRF_NONCE" value="${sessionScope['org.apache.catalina.filters.CSRF_NONCE']}">
                       <input type="hidden" name="eduId" value="${edu.id}">
                       <button type="submit" class="btn btn-danger" onclick="return confirm('Xóa mục học vấn này?');"><i class="fas fa-trash"></i></button>
                     </form>
@@ -228,6 +232,7 @@
       <h5>Thêm Mục Kinh Nghiệm Mới</h5>
       <form action="${pageContext.request.contextPath}/admin/profile" method="post" class="mb-4">
         <input type="hidden" name="action" value="addExperience">
+        <input type="hidden" name="org.apache.catalina.filters.CSRF_NONCE" value="${sessionScope['org.apache.catalina.filters.CSRF_NONCE']}">
         <div class="form-row">
           <div class="form-group col-md-6"><label for="expCompanyName">Tên công ty *</label><input type="text" class="form-control form-control-sm" id="expCompanyName" name="expCompanyName" required></div>
           <div class="form-group col-md-6"><label for="expPosition">Vị trí *</label><input type="text" class="form-control form-control-sm" id="expPosition" name="expPosition" required></div>
@@ -262,6 +267,7 @@
                   <td>
                     <form action="${pageContext.request.contextPath}/admin/profile" method="post" style="display: inline;">
                       <input type="hidden" name="action" value="deleteExperience">
+                      <input type="hidden" name="org.apache.catalina.filters.CSRF_NONCE" value="${sessionScope['org.apache.catalina.filters.CSRF_NONCE']}">
                       <input type="hidden" name="expId" value="${exp.id}">
                       <button type="submit" class="btn btn-danger" onclick="return confirm('Xóa mục kinh nghiệm này?');"><i class="fas fa-trash"></i></button>
                     </form>

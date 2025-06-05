@@ -85,14 +85,17 @@
                       <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-toggle="dropdown">Duyệt</button>
                       <div class="dropdown-menu">
                         <form action="${pageContext.request.contextPath}/admin/comments" method="post" style="display: block;">
+                          <input type="hidden" name="org.apache.catalina.filters.CSRF_NONCE" value="${sessionScope['org.apache.catalina.filters.CSRF_NONCE']}">
                           <input type="hidden" name="action" value="updateStatus"><input type="hidden" name="commentId" value="${comment.id}"><input type="hidden" name="newStatus" value="approved">
                           <button type="submit" class="dropdown-item ${comment.status == 'approved' ? 'active' : ''}"><i class="fas fa-check"></i> Approved</button>
                         </form>
                         <form action="${pageContext.request.contextPath}/admin/comments" method="post" style="display: block;">
+                          <input type="hidden" name="org.apache.catalina.filters.CSRF_NONCE" value="${sessionScope['org.apache.catalina.filters.CSRF_NONCE']}">
                           <input type="hidden" name="action" value="updateStatus"><input type="hidden" name="commentId" value="${comment.id}"><input type="hidden" name="newStatus" value="pending">
                           <button type="submit" class="dropdown-item ${comment.status == 'pending' ? 'active' : ''}"><i class="fas fa-clock"></i> Pending</button>
                         </form>
                         <form action="${pageContext.request.contextPath}/admin/comments" method="post" style="display: block;">
+                          <input type="hidden" name="org.apache.catalina.filters.CSRF_NONCE" value="${sessionScope['org.apache.catalina.filters.CSRF_NONCE']}">
                           <input type="hidden" name="action" value="updateStatus"><input type="hidden" name="commentId" value="${comment.id}"><input type="hidden" name="newStatus" value="spam">
                           <button type="submit" class="dropdown-item ${comment.status == 'spam' ? 'active' : ''}"><i class="fas fa-ban"></i> Spam</button>
                         </form>
@@ -100,6 +103,7 @@
                     </div>
                     <a href="${pageContext.request.contextPath}/admin/comments?action=editForm&commentId=${comment.id}" class="btn btn-sm btn-warning mr-1" title="Sửa nội dung"><i class="fas fa-edit"></i></a>
                     <form action="${pageContext.request.contextPath}/admin/comments" method="post" style="display:inline;">
+                      <input type="hidden" name="org.apache.catalina.filters.CSRF_NONCE" value="${sessionScope['org.apache.catalina.filters.CSRF_NONCE']}">
                       <input type="hidden" name="action" value="delete">
                       <input type="hidden" name="commentId" value="${comment.id}">
                       <button type="submit" class="btn btn-sm btn-danger" title="Xóa" onclick="return confirm('Bạn có chắc muốn xóa bình luận này?');">

@@ -31,6 +31,7 @@
 
         <form action="${pageContext.request.contextPath}/admin/comments" method="post">
             <input type="hidden" name="action" value="saveEdit">
+            <input type="hidden" name="org.apache.catalina.filters.CSRF_NONCE" value="${sessionScope['org.apache.catalina.filters.CSRF_NONCE']}">
             <input type="hidden" name="commentId" value="${commentToEdit.id}">
 
             <div class="form-group">

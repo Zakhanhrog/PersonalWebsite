@@ -22,6 +22,7 @@
     </div>
   </c:if>
   <form action="${pageContext.request.contextPath}/admin/login" method="post">
+    <input type="hidden" name="org.apache.catalina.filters.CSRF_NONCE" value="${sessionScope['org.apache.catalina.filters.CSRF_NONCE']}">
     <div class="form-group mb-3">
       <label for="username">Tên đăng nhập:</label>
       <input type="text" class="form-control" id="username" name="username" required autofocus>

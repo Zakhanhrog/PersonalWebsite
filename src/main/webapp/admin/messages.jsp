@@ -113,24 +113,29 @@
                                             </button>
                                             <div class="dropdown-menu">
                                                 <form action="${pageContext.request.contextPath}/admin/messages" method="post" class="status-form">
+                                                    <input type="hidden" name="org.apache.catalina.filters.CSRF_NONCE" value="${sessionScope['org.apache.catalina.filters.CSRF_NONCE']}">
                                                     <input type="hidden" name="action" value="updateStatus"><input type="hidden" name="id" value="${msg.id}"><input type="hidden" name="status" value="new">
                                                     <button type="submit" class="dropdown-item ${msg.status == 'new' ? 'active' : ''}">Đánh dấu Mới</button>
                                                 </form>
                                                 <form action="${pageContext.request.contextPath}/admin/messages" method="post" class="status-form">
+                                                    <input type="hidden" name="org.apache.catalina.filters.CSRF_NONCE" value="${sessionScope['org.apache.catalina.filters.CSRF_NONCE']}">
                                                     <input type="hidden" name="action" value="updateStatus"><input type="hidden" name="id" value="${msg.id}"><input type="hidden" name="status" value="read">
                                                     <button type="submit" class="dropdown-item ${msg.status == 'read' ? 'active' : ''}">Đánh dấu Đã đọc</button>
                                                 </form>
                                                 <form action="${pageContext.request.contextPath}/admin/messages" method="post" class="status-form">
+                                                    <input type="hidden" name="org.apache.catalina.filters.CSRF_NONCE" value="${sessionScope['org.apache.catalina.filters.CSRF_NONCE']}">
                                                     <input type="hidden" name="action" value="updateStatus"><input type="hidden" name="id" value="${msg.id}"><input type="hidden" name="status" value="replied">
                                                     <button type="submit" class="dropdown-item ${msg.status == 'replied' ? 'active' : ''}">Đánh dấu Đã phản hồi</button>
                                                 </form>
                                                 <form action="${pageContext.request.contextPath}/admin/messages" method="post" class="status-form">
+                                                    <input type="hidden" name="org.apache.catalina.filters.CSRF_NONCE" value="${sessionScope['org.apache.catalina.filters.CSRF_NONCE']}">
                                                     <input type="hidden" name="action" value="updateStatus"><input type="hidden" name="id" value="${msg.id}"><input type="hidden" name="status" value="archived">
                                                     <button type="submit" class="dropdown-item ${msg.status == 'archived' ? 'active' : ''}">Đánh dấu Lưu trữ</button>
                                                 </form>
                                             </div>
                                         </div>
                                         <form action="${pageContext.request.contextPath}/admin/messages" method="post" class="d-inline delete-form">
+                                            <input type="hidden" name="org.apache.catalina.filters.CSRF_NONCE" value="${sessionScope['org.apache.catalina.filters.CSRF_NONCE']}">
                                             <input type="hidden" name="action" value="delete">
                                             <input type="hidden" name="id" value="${msg.id}">
                                             <button type="submit" class="btn btn-sm btn-danger action-button" title="Xóa" onclick="return confirm('Bạn có chắc chắn muốn xóa tin nhắn ID ${msg.id} này?');">
