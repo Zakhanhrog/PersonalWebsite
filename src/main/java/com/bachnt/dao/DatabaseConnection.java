@@ -1,7 +1,5 @@
 package com.bachnt.dao;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -18,80 +16,61 @@ public class DatabaseConnection {
 
     public static Connection getConnection() throws SQLException {
         String dbType = System.getenv("DB_TYPE");
-        String dbUrl = System.getenv("DB_URL");
+        String dbHost = System.getenv("DB_HOST");
+        String dbPort = System.getenv("DB_PORT");
         String dbUser = System.getenv("DB_USER");
         String dbPassword = System.getenv("DB_PASSWORD");
-        String dbName = System.getenv("DB_NAME"); // Thêm biến này cho tên DB
+        String dbName = System.getenv("DB_NAME");
 
-        if (dbUrl != null && dbUser != null && dbPassword != null) {
+        // Điều kiện kiểm tra bao gồm tất cả các biến cần thiết
+        if (dbType != null && dbHost != null && dbPort != null && dbUser != null && dbPassword != null && dbName != null) {
             if ("postgres".equalsIgnoreCase(dbType)) {
-                logger.info("DB_TYPE is postgres. Attempting to connect to PostgreSQL.");
+                logger.info("DB_TYPE is postgres. Connecting to PostgreSQL.");
                 try {
                     Class.forName(POSTGRESQL_DRIVER_CLASS);
-                    String connectionUrl = String.format("jdbc:postgresql://%s/%s?sslmode=require", dbUrl, dbName);
-                    logger.info("Connecting to PostgreSQL with URL: {}", connectionUrl);
+                    String connectionUrl = String.format("jdbc:postgresql://%s:%s/%s?sslmode=require", dbHost, dbPort, dbName);
+                    logger.info("PostgreSQL URL: {}", connectionUrl);
                     return DriverManager.getConnection(connectionUrl, dbUser, dbPassword);
                 } catch (ClassNotFoundException e) {
                     logger.error("PostgreSQL JDBC Driver not found.", e);
                     throw new SQLException("PostgreSQL JDBC Driver not found.", e);
                 }
             } else if ("mysql".equalsIgnoreCase(dbType)) {
-                logger.info("DB_TYPE is mysql. Attempting to connect to MySQL.");
+                logger.info("DB_TYPE is mysql. Connecting to MySQL.");
                 try {
                     Class.forName(MYSQL_DRIVER_CLASS);
-                    String connectionUrl = String.format("jdbc:mysql://%s/%s?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true", dbUrl, dbName);
-                    logger.info("Connecting to MySQL with URL: {}", connectionUrl);
+                    String connectionUrl = String.format("jdbc:mysql://%s:%s/%s?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true", dbHost, dbPort, dbName);
+                    logger.info("MySQL URL: {}", connectionUrl);
                     return DriverManager.getConnection(connectionUrl, dbUser, dbPassword);
                 } catch (ClassNotFoundException e) {
                     logger.error("MySQL JDBC Driver not found.", e);
                     throw new SQLException("MySQL JDBC Driver not found.", e);
                 }
-            } else if (dbUrl.startsWith("jdbc:postgresql://")) { // Tương thích ngược với DATABASE_URL của Heroku
-                logger.info("DATABASE_URL (DB_URL) for PostgreSQL found. Parsing and connecting.");
-                try {
-                    Class.forName(POSTGRESQL_DRIVER_CLASS);
-                    URI dbUri = new URI(dbUrl.substring("jdbc:".length())); // Bỏ "jdbc:" để URI parse đúng
-
-                    String username = dbUri.getUserInfo().split(":")[0];
-                    String passwordFromUri = dbUri.getUserInfo().split(":")[1];
-                    // Tái tạo jdbcUrl từ URI, vì dbUrl lúc này là đầy đủ rồi
-                    String jdbcUrl = "jdbc:postgresql://" + dbUri.getHost() + ":" + dbUri.getPort() + dbUri.getPath();
-
-                    if (!jdbcUrl.contains("?")) {
-                        jdbcUrl += "?sslmode=require";
-                    } else {
-                        if (!jdbcUrl.contains("sslmode=")) {
-                            jdbcUrl += "&sslmode=require";
-                        }
-                    }
-                    logger.info("Connecting to PostgreSQL with parsed URL: {} , User: {}", jdbcUrl, username);
-                    return DriverManager.getConnection(jdbcUrl, username, passwordFromUri);
-
-                } catch (URISyntaxException e) {
-                    logger.error("Invalid DATABASE_URL (DB_URL) syntax: {}", dbUrl, e);
-                    throw new SQLException("Invalid DATABASE_URL (DB_URL) syntax.", e);
-                } catch (ClassNotFoundException e) {
-                    logger.error("PostgreSQL JDBC Driver not found.", e);
-                    throw new SQLException("PostgreSQL JDBC Driver not found.", e);
-                }
-            }
-            else {
-                logger.warn("DB_TYPE environment variable not set or not recognized (expected 'postgres' or 'mysql'). " +
-                        "No specific logic for DB_URL format: {}. Attempting fallback to local MySQL (THIS SHOULD NOT HAPPEN ON RENDER).", dbUrl);
-                return getLocalMySQLConnectionForDev(); // Chỉ nên gọi khi phát triển local
+            } else {
+                logger.error("DB_TYPE environment variable ('{}') not recognized (expected 'postgres' or 'mysql'). Cannot establish database connection.", dbType);
+                throw new SQLException("Unsupported DB_TYPE: " + dbType);
             }
         } else {
-            logger.warn("One or more database environment variables (DB_URL, DB_USER, DB_PASSWORD) are not set. " +
-                    "Attempting fallback to local MySQL (THIS SHOULD NOT HAPPEN ON RENDER).");
-            return getLocalMySQLConnectionForDev(); // Chỉ nên gọi khi phát triển local
+            // Log rõ hơn các biến nào bị thiếu
+            StringBuilder missingVars = new StringBuilder();
+            if (dbType == null) missingVars.append("DB_TYPE, ");
+            if (dbHost == null) missingVars.append("DB_HOST, ");
+            if (dbPort == null) missingVars.append("DB_PORT, ");
+            if (dbName == null) missingVars.append("DB_NAME, ");
+            if (dbUser == null) missingVars.append("DB_USER, ");
+            if (dbPassword == null) missingVars.append("DB_PASSWORD, ");
+
+            String missing = missingVars.length() > 0 ? missingVars.substring(0, missingVars.length() - 2) : "Unknown";
+
+            logger.warn("One or more database environment variables are not set (Missing: {}). Attempting fallback to local MySQL (THIS SHOULD NOT HAPPEN ON RENDER).", missing);
+            return getLocalMySQLConnectionForDev();
         }
     }
 
-    // Phương thức riêng cho kết nối local MySQL để dễ quản lý
     private static Connection getLocalMySQLConnectionForDev() throws SQLException {
         final String LOCAL_MYSQL_URL_STRING = "jdbc:mysql://localhost:3306/personalwebdb?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
         final String LOCAL_MYSQL_USER_STRING = "root";
-        final String LOCAL_MYSQL_PASSWORD_STRING = "khanh7679"; // Hãy cẩn thận với việc hardcode mật khẩu
+        final String LOCAL_MYSQL_PASSWORD_STRING = "khanh7679";
 
         logger.info("Connecting to local MySQL (DEV fallback) with URL: {}", LOCAL_MYSQL_URL_STRING);
         try {
@@ -102,8 +81,7 @@ public class DatabaseConnection {
             throw new SQLException("MySQL JDBC Driver not found (DEV fallback).", e);
         }
     }
-
-
+    // ... (các hàm closeResources giữ nguyên) ...
     public static void closeConnection(Connection connection) {
         if (connection != null) {
             try {
